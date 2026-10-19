@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050A12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BM Control">
+<meta name="format-detection" content="telephone=no">
+<link id="touch-icon" rel="apple-touch-icon" href="">
+<link id="manifest" rel="manifest" href="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<title>Re:zenythe BM Control</title>
+<style>
+:root{
+  --bg:#050A12; --bg2:#08111C; --panel:#0B1522; --panel2:#10203A; --line:#1C2E44; --line2:#2A3F57;
+  --text:#E6F1F5; --mute:#9FB3C2; --dim:#8094A6;
+  --em:#2EE6A6; --emInk:#03140D; --emBg:rgba(46,230,166,.12);
+  --cy:#6CCFF6; --amber:#F2B66B; --danger:#FF8A80; --violet:#B79CFF;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;-webkit-text-size-adjust:100%;line-height:1.6;font-size:17px}
+body{min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{font-size:17px}
+button:disabled{opacity:.4;cursor:not-allowed}
+header.top{position:sticky;top:0;z-index:20;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;background:rgba(5,10,18,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top-in{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.brand{flex:1;min-width:0}
+.brand small{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.24em;color:var(--em)}
+.brand b{display:block;font-size:24px;font-weight:900;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand b span{color:var(--em)}
+.pill{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:14px;color:var(--mute);border:1px solid var(--line);background:transparent;border-radius:999px;padding:0 14px;height:44px;cursor:pointer;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--dim);flex:0 0 auto}
+.dot.ok{background:var(--em)} .dot.pending{background:var(--cy);animation:pulse 1.2s infinite} .dot.error{background:var(--amber)} .dot.local{background:var(--dim)}
+@keyframes pulse{50%{opacity:.35}}
+.gear{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;color:var(--mute)}
+.gear.on{border-color:var(--em);color:var(--em)}
+@media(max-width:400px){.brand b{font-size:20px}.pill{padding:0 10px;font-size:13px;gap:6px}.top-in{gap:8px}}
+.ico{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+main{max-width:980px;margin:0 auto;padding:16px 16px calc(104px + env(safe-area-inset-bottom))}
+.view{display:none}.view.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+h2{font-size:16px;margin:24px 0 10px;color:var(--mute);font-weight:700;letter-spacing:.06em;display:flex;align-items:center;gap:8px}
+h2::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--em);box-shadow:0 0 10px rgba(46,230,166,.6)}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(min-width:760px){.kpis{grid-template-columns:repeat(3,1fr)!important}.wide2{display:grid;grid-template-columns:1fr 1fr;gap:16px}}
+.kpi{padding:14px 16px}
+.kpi .l{font-size:14px;color:var(--mute)}
+.kpi .v{font-family:var(--mono);font-size:30px;font-weight:700;margin-top:2px;line-height:1.25}
+.kpi .v small{font-family:'Zen Kaku Gothic New',sans-serif;font-size:15px;color:var(--mute);font-weight:700;margin-left:2px}
+.kpi .s{font-size:13px;color:var(--dim);margin-top:2px}
+.kpi.em .v{color:var(--em)}
+.unm{color:var(--dim)!important;font-size:20px!important;font-family:'Zen Kaku Gothic New',sans-serif!important}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:0 16px;border-radius:16px;border:1px solid var(--line2);background:var(--bg2);font-size:17px;font-weight:700;cursor:pointer;width:100%;text-align:center;text-decoration:none;color:var(--text);line-height:1.25;flex-direction:column}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--em);border-color:transparent;color:var(--emInk);font-weight:900}
+.btn.cyan{background:var(--cy);border-color:transparent;color:#03131C;font-weight:900}
+.btn.ghost{background:transparent}
+.btn.danger{background:rgba(255,138,128,.1);border-color:rgba(255,138,128,.5);color:var(--danger)}
+.btn.warn{background:rgba(242,182,107,.12);border-color:rgba(242,182,107,.55);color:var(--amber)}
+.btn.sm{min-height:46px;font-size:15px;border-radius:14px;padding:0 12px}
+.btn.big{min-height:64px;font-size:18px}
+.btn small{display:block;font-size:12px;font-weight:700;opacity:.85}
+label.f{display:block;font-size:15px;color:var(--mute);margin:14px 0 6px}
+.in{width:100%;background:#060E19;border:1px solid var(--line2);border-radius:14px;padding:13px 14px;outline:none;min-height:52px}
+.in:focus{border-color:var(--em)}
+.in.sm{min-height:46px;padding:9px 10px}
+textarea.in{min-height:100px;resize:vertical}
+select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mute) 50%),linear-gradient(135deg,var(--mute) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;background:#060E19;border:1px solid var(--line2);border-radius:16px;padding:5px}
+.seg button{border:0;background:transparent;border-radius:12px;min-height:54px;font-weight:700;color:var(--mute);cursor:pointer;line-height:1.2;font-size:16px}
+.seg button small{display:block;font-size:12px;font-weight:700}
+.seg button.on{background:var(--emBg);color:var(--em);box-shadow:inset 0 0 0 1px rgba(46,230,166,.5)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chipset{display:flex;flex-wrap:wrap;gap:8px}
+.chip{flex:0 0 auto;border:1px solid var(--line2);background:var(--bg2);border-radius:999px;padding:9px 15px;font-size:15px;font-weight:700;color:var(--mute);cursor:pointer;min-height:44px}
+.chip b{margin-left:6px;color:var(--text)}
+.chip.on{border-color:var(--em);color:var(--em);background:var(--emBg)}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.item{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:13px 15px;cursor:pointer;position:relative;text-align:left;width:100%;display:block}
+.item:active{background:var(--panel)}
+.t{font-weight:700;font-size:17px;margin:4px 0 6px;word-break:break-word}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;color:var(--mute)}
+.id{font-family:var(--mono);font-size:13px;color:var(--cy);letter-spacing:.02em}
+.id.tmp{color:var(--amber)}
+.bd{display:inline-flex;align-items:center;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:700;border:1px solid var(--line2);color:var(--mute);white-space:nowrap}
+.bd.em{border-color:rgba(46,230,166,.55);color:var(--em)}
+.bd.warn{border-color:rgba(242,182,107,.6);color:var(--amber)}
+.bd.danger{border-color:rgba(255,138,128,.6);color:var(--danger)}
+.bd.info{border-color:rgba(108,207,246,.55);color:var(--cy)}
+.bd.violet{border-color:rgba(183,156,255,.55);color:var(--violet)}
+.pri{width:9px;height:9px;border-radius:50%;display:inline-block}
+.pri.high{background:var(--danger)}.pri.mid{background:var(--amber)}.pri.low{background:var(--cy)}
+.st-todo{color:var(--mute)}.st-doing{color:var(--cy)}.st-review{color:var(--em)}.st-done{color:var(--em)}.st-hold{color:var(--amber)}
+.empty{color:var(--dim);text-align:center;padding:24px 10px;font-size:15px;border:1px dashed var(--line2);border-radius:16px}
+table.tb{width:100%;border-collapse:collapse;font-size:14.5px}
+.tb th,.tb td{padding:10px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tb th:first-child,.tb td:first-child{text-align:left;white-space:normal}
+.tb th{color:var(--mute);font-weight:700;font-size:13px}
+.bar{height:6px;background:#0F1C2E;border-radius:3px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--em)}
+.note{font-size:14px;color:var(--dim);margin-top:10px}
+.safe{border:1px solid rgba(108,207,246,.35);background:rgba(108,207,246,.06);color:#CBEAF7;border-radius:14px;padding:12px 14px;font-size:14px;margin-top:14px}
+.alert{border:1px solid rgba(255,138,128,.45);background:rgba(255,138,128,.07);color:#FFD2CD;border-radius:14px;padding:12px 14px;font-size:14.5px;margin-top:10px}
+.lock{border:1px dashed rgba(242,182,107,.6);background:rgba(242,182,107,.07);color:#F7D8AE;border-radius:14px;padding:12px 14px;font-size:14.5px;margin-top:8px}
+pre.pv{white-space:pre-wrap;word-break:break-word;background:#060E19;border:1px solid var(--line2);border-radius:14px;padding:12px;font-size:14px;max-height:300px;overflow:auto;margin:8px 0;font-family:inherit}
+pre.pv.locked{opacity:.8;border-style:dashed;border-color:rgba(242,182,107,.6);-webkit-user-select:none;user-select:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.stack{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.mic{position:absolute;right:8px;bottom:8px;width:44px;height:44px;border-radius:12px;border:1px solid var(--line2);background:var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--mute)}
+.mic.rec{background:rgba(255,138,128,.2);border-color:var(--danger);color:var(--danger);animation:pulse 1s infinite}
+.rel{position:relative}
+/* ===== 頭脳ネットワーク（ホーム） ===== */
+.hero{background:#07101B;border:1px solid var(--line);border-radius:24px;padding:16px 0 12px;cursor:pointer}
+.hero .hd{padding:0 16px;font-size:15px;color:var(--mute)}
+.hero .tp{padding:0 16px;font-size:20px;font-weight:900;line-height:1.45;margin-top:2px;word-break:break-word}
+.net{position:relative;width:100%;max-width:420px;height:240px;margin:8px auto 0}
+.net svg.lines{position:absolute;inset:0;width:100%;height:100%}
+.core{position:absolute;left:calc(50% - 46px);top:74px;width:92px;height:92px;border-radius:50%;background:#0A1A16;border:2px solid var(--em);box-shadow:0 0 30px rgba(46,230,166,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.core b{font-family:var(--mono);font-size:22px;color:var(--em);line-height:1.1}
+.core span{font-size:13px;color:#B7D6CC}
+.core small{font-family:var(--mono);font-size:10.5px;color:var(--mute)}
+.node{position:absolute;width:108px;height:48px;border-radius:13px;background:var(--panel);border:1px solid var(--line);text-align:center;padding-top:4px;line-height:1.25;pointer-events:none}
+.node b{display:block;font-size:14px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.node small{font-size:12px;color:var(--mute)}
+.node.chair{border-color:var(--em)} .node.chair small{color:var(--em)}
+.node.got{border-color:rgba(46,230,166,.6)} .node.got small{color:var(--em)}
+.node.sent small{color:var(--cy)}
+.node.exec{border:1.5px solid var(--cy)} .node.exec small{color:var(--cy)}
+.node.scribe small{color:var(--violet)}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));text-align:center}
+.fstep{border:0;background:none;cursor:pointer;padding:4px 0;color:var(--mute);font-size:14px;font-weight:700}
+.fstep .c{margin:0 auto 4px;width:50px;height:50px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:21px;font-weight:700;color:var(--text)}
+.fstep.doing .c{border:1.5px solid var(--cy);color:var(--cy)} .fstep.doing{color:var(--cy)}
+.fstep.hot .c{background:var(--em);border-color:var(--em);color:var(--emInk)} .fstep.hot{color:var(--em)}
+.fstep.warn .c{border:1px dashed var(--amber);color:var(--amber)} .fstep.warn{color:var(--amber)}
+.fstep.on .c{box-shadow:0 0 0 3px var(--bg2),0 0 0 5px var(--em)}
+/* ===== 会議シートのステップ ===== */
+.step{border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:14px;background:var(--bg2)}
+.step h4{margin:0 0 4px;font-size:17px;display:flex;gap:10px;align-items:center}
+.step h4 .no{font-family:var(--mono);color:var(--em);font-size:14px;border:1px solid rgba(46,230,166,.5);border-radius:8px;padding:0 7px}
+.op{border:1px solid var(--line2);border-radius:14px;padding:12px;margin-top:10px;background:var(--panel)}
+.op .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.op .hd b{font-size:16px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(3,7,13,.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs-in{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs button{border:0;background:transparent;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;font-weight:700;color:#8DA2B3;cursor:pointer;position:relative}
+nav.tabs button svg{width:25px;height:25px}
+nav.tabs button.on{color:var(--em)}
+.tbadge{position:absolute;top:7px;left:calc(50% + 6px);min-width:20px;height:20px;border-radius:10px;background:var(--em);color:var(--emInk);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 5px}
+#backdrop{position:fixed;inset:0;background:rgba(1,4,9,.65);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+#backdrop.show{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:92vh;transform:translateY(105%);transition:transform .25s ease;background:var(--bg2);border-top:1px solid var(--line2);border-radius:24px 24px 0 0;display:flex;flex-direction:column;max-width:760px;margin:0 auto}
+#sheet.show{transform:none}
+.sh-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 0}
+.grab{width:44px;height:5px;border-radius:3px;background:var(--line2);margin:8px auto 0}
+#sheet-body{overflow:auto;padding:6px 16px calc(28px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+#sheet-body h3{margin:6px 0 4px;font-size:20px;word-break:break-word}
+.x{width:44px;height:44px;border-radius:12px;border:1px solid var(--line2);background:var(--panel);font-size:22px;cursor:pointer}
+.stbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stbtns button{min-height:52px;border-radius:14px;border:1px solid var(--line2);background:var(--panel);font-weight:700;font-size:14.5px;cursor:pointer;color:var(--mute)}
+.stbtns button.on{background:var(--emBg);border-color:var(--em);color:var(--em)}
+#dlg{position:fixed;inset:0;z-index:60;background:rgba(1,4,9,.75);display:none;align-items:center;justify-content:center;padding:20px}
+#dlg.show{display:flex}
+.dlg-box{background:var(--panel);border:1px solid var(--line2);border-radius:20px;padding:18px;max-width:440px;width:100%;max-height:86vh;overflow:auto}
+.dlg-box h3{margin:0 0 8px;font-size:18px}
+.dlg-box p{margin:0;color:var(--mute);font-size:15px;white-space:pre-wrap;word-break:break-word}
+#toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);opacity:0;z-index:70;background:#082019;border:1px solid var(--em);color:var(--em);padding:11px 18px;border-radius:999px;font-size:15px;font-weight:700;transition:.2s;pointer-events:none;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel);margin-top:8px;font-size:15px}
+.chk input[type=checkbox],.chk input[type=radio]{width:22px;height:22px;margin-top:2px;accent-color:var(--em);flex:0 0 auto}
+.cand{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:10px;margin-top:8px}
+.cand .hd{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mute);margin-bottom:6px;flex-wrap:wrap}
+.cand .hd input{width:22px;height:22px;accent-color:var(--em)}
+.cand .g3{display:grid;grid-template-columns:1.2fr 1fr .7fr;gap:6px;margin-top:6px}
+.hist{font-size:13.5px;border-bottom:1px solid var(--line);padding:8px 0;color:var(--mute);word-break:break-word}
+.hist b{color:var(--text);font-weight:700}
+.foot{font-size:12px;color:var(--dim);text-align:center;margin-top:24px}
+.hide{display:none!important}
+.overdue{color:var(--danger)!important;font-weight:700}
+.vt{margin-top:12px}
+.rep{border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:14px;padding:12px;margin-top:10px;background:var(--panel)}
+.rep.verified{border-left-color:var(--em)}
+.rep.rejected{border-left-color:var(--danger)}
+.rep .c{margin:6px 0;font-size:15.5px;word-break:break-word}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px;color:var(--mute);margin-top:4px}
+.kv b{color:var(--text);font-weight:700;word-break:break-word}
+details.dt{margin-top:8px}
+details.dt summary{cursor:pointer;color:var(--mute);font-size:15px;padding:8px 0;list-style:none}
+details.dt summary::-webkit-details-marker{display:none}
+details.dt summary::before{content:"▸ ";color:var(--em)}
+details.dt[open] summary::before{content:"▾ "}
+.errl{margin:8px 0 0;padding-left:18px;font-size:14px;color:#FFD2CD}
+.errl li{margin:2px 0}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand"><small>BRAIN·MEETINGS</small><b>Re:zenythe <span>BM</span></b></div>
+  <button class="pill" data-act="open-sync" aria-label="同期の状態"><span class="dot local" id="sync-dot"></span><span id="day-badge">DAY --/30</span></button>
+  <button class="gear" data-act="go" data-v="set" aria-label="設定"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</div></header>
+
+<main>
+<!-- ===== ホーム ===== -->
+<section class="view on" id="v-home">
+  <div id="home-alerts"></div>
+  <div id="hero"></div>
+  <div class="card" style="margin-top:12px;padding:14px 8px 12px">
+    <div style="font-size:15px;color:var(--mute);padding:0 8px 8px">思考の流れ <span style="font-size:13px">（タップで案件を表示）</span></div>
+    <div class="flow" id="flow"></div>
+  </div>
+  <div class="row2">
+    <button class="btn primary" data-act="go" data-v="meet">会議を起動</button>
+    <button class="btn" data-act="log-paste">報告を取込</button>
+  </div>
+  <h2 id="list-title">案件</h2>
+  <div class="list" id="home-list"></div>
+  <h2>効果測定</h2>
+  <div class="seg" id="period-seg" style="margin-bottom:10px">
+    <button data-p="trial" class="on">検証期間（30日）</button>
+    <button data-p="all">全期間</button>
+  </div>
+  <div class="grid2 kpis" id="kpis"></div>
+  <div class="wide2">
+    <div><h2>担当AI別の処理状況</h2><div class="card" id="by-assignee"></div></div>
+    <div><h2>実績（担当区分別）</h2><div class="card" id="by-category"></div></div>
+  </div>
+  <p class="foot">表示はすべて人の操作・受信した報告にもとづきます。本アプリはAIを自動実行しません。</p>
+</section>
+
+<!-- ===== 会議 ===== -->
+<section class="view" id="v-meet">
+  <h2 style="margin-top:4px">BM会議を起動</h2>
+  <div class="seg" id="mtype-seg">
+    <button data-t="quick" class="on">Quick<small>即決会議</small></button>
+    <button data-t="project">Project<small>実行会議</small></button>
+    <button data-t="board">Board<small>経営戦略</small></button>
+  </div>
+  <label class="f">議題</label>
+  <div class="rel"><textarea class="in" id="m-topic" maxlength="200" placeholder="例：乾燥作業日報のAI集計を導入するか" style="padding-right:60px"></textarea>
+    <button class="mic hide" data-act="mic" data-target="m-topic" aria-label="音声入力"><svg class="ico" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
+  <label class="f">背景・補足（任意）</label>
+  <div class="rel"><textarea class="in" id="m-context" maxlength="2000" placeholder="現状・制約・判断材料など（個人情報・給与・APIキーは書かない）" style="padding-right:60px"></textarea>
+    <button class="mic hide" data-act="mic" data-target="m-context" aria-label="音声入力"><svg class="ico" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
+  <label class="f">意見を聞くAI（議長 <span id="m-chair"></span> の前に意見を出します）</label>
+  <div class="chipset" id="m-members"></div>
+  <div class="stack"><button class="btn primary big" data-act="meet-create">会議を起動する</button></div>
+  <h2>会議一覧</h2>
+  <div class="list" id="meet-list"></div>
+</section>
+
+<!-- ===== 指示 ===== -->
+<section class="view" id="v-task">
+  <h2 style="margin-top:4px" id="tf-heading">AI指示を発行</h2>
+  <div class="card">
+    <label class="f" style="margin-top:0">件名（依頼内容）</label>
+    <input class="in" id="tf-title" maxlength="120" placeholder="例：先週分のAI業務日誌を案件別に集計">
+    <div class="grid2">
+      <div><label class="f">担当AI</label><select class="in" id="tf-assignee"></select></div>
+      <div><label class="f">関連会議</label><select class="in" id="tf-meeting"></select></div>
+    </div>
+    <div class="grid2">
+      <div><label class="f">優先度</label><select class="in" id="tf-priority"><option value="high">高</option><option value="mid" selected>中</option><option value="low">低</option></select></div>
+      <div><label class="f">期限</label><input class="in" type="date" id="tf-due" min="2020-01-01" max="2100-12-31"></div>
+    </div>
+    <label class="f">承認状態</label>
+    <select class="in" id="tf-approval"><option value="pending">未承認（送付不可）</option><option value="approved">承認済（送付可）</option><option value="rejected">却下</option></select>
+    <label class="f">詳細・完了条件（任意）</label>
+    <div class="rel"><textarea class="in" id="tf-detail" maxlength="2000" placeholder="対象範囲、手順、完了条件など" style="padding-right:60px"></textarea>
+      <button class="mic hide" data-act="mic" data-target="tf-detail" aria-label="音声入力"><svg class="ico" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></div>
+    <div class="row2">
+      <button class="btn ghost" data-act="tf-clear">クリア</button>
+      <button class="btn primary" data-act="tf-save" id="tf-save">案件IDを発行</button>
+    </div>
+  </div>
+  <h2>指示一覧</h2>
+  <input class="in" id="task-q" placeholder="ID・件名・担当で検索" aria-label="指示を検索">
+  <div class="chips" id="ap-chips" style="margin-top:10px"></div>
+  <div class="list" id="task-list"></div>
+</section>
+
+<!-- ===== 検証 ===== -->
+<section class="view" id="v-verify">
+  <h2 style="margin-top:4px">報告の照合・検証</h2>
+  <p class="note" style="margin-top:-4px">Grok Bot等からの報告を案件IDで照合します。確認済の報告がある案件だけを完了にできます。</p>
+  <div class="chips" id="vf-chips"></div>
+  <div id="verify-list"></div>
+</section>
+
+<!-- ===== 実績 ===== -->
+<section class="view" id="v-log">
+  <h2 style="margin-top:4px">Grok Bot 実績管理</h2>
+  <div class="grid2">
+    <button class="btn" data-act="csv-pick">CSV取込</button>
+    <button class="btn" data-act="log-paste">報告を貼付取込</button>
+    <button class="btn" data-act="log-new">手動で追加</button>
+    <button class="btn" data-act="csv-template">取込用CSV見本</button>
+  </div>
+  <input type="file" id="csv-file" accept=".csv,.tsv,.txt,text/csv,text/plain" class="hide">
+  <div class="chips" id="log-chips" style="margin-top:14px"></div>
+  <div class="list" id="log-list"></div>
+</section>
+
+<!-- ===== 設定 ===== -->
+<section class="view" id="v-set">
+  <h2 style="margin-top:4px">スプレッドシート連携</h2>
+  <div class="card" id="conn-box"></div>
+  <h2>運用設定</h2>
+  <div class="card">
+    <label class="f" style="margin-top:0">組織名（プロンプトに挿入）</label>
+    <input class="in" id="s-company" maxlength="60">
+    <label class="f">検証開始日（30日間検証の起点）</label>
+    <input class="in" type="date" id="s-start" min="2020-01-01" max="2100-12-31">
+    <div class="grid2">
+      <div><label class="f">議長AI</label><select class="in" id="s-chair"></select></div>
+      <div><label class="f">報告の検証役</label><select class="in" id="s-verifier"></select></div>
+    </div>
+    <label class="f">議事録係</label>
+    <select class="in" id="s-scribe"></select>
+    <label class="f">会議ごとに意見を聞くAI</label>
+    <div id="s-members"></div>
+    <label class="f">AI設定（1行に「名前 | 起動URL | 役割 | 観点」）</label>
+    <textarea class="in" id="s-ais" style="min-height:220px;font-size:16px"></textarea>
+    <p class="note" style="margin-top:6px">URLは https:// のみ。観点は意見照会の質問文に入ります。役割に「実行」を含むAIが現場実行役、「決裁」を含むのが人間です。</p>
+    <div class="stack"><button class="btn primary" data-act="set-save">設定を保存</button></div>
+  </div>
+  <h2>安全点検</h2>
+  <div class="card" id="audit-box"></div>
+  <h2>データ（バックアップ・連携）</h2>
+  <div class="grid2">
+    <button class="btn" data-act="json-export">JSON書き出し</button>
+    <button class="btn" data-act="json-pick">JSON読み込み</button>
+    <button class="btn" data-act="csv-tasks">案件CSV</button>
+    <button class="btn" data-act="csv-logs">実績CSV</button>
+    <button class="btn" data-act="csv-meetings">会議CSV</button>
+    <button class="btn" data-act="restore">直前の状態に戻す</button>
+  </div>
+  <input type="file" id="json-file" accept=".json,application/json,text/plain" class="hide">
+  <div class="card" style="margin-top:12px;font-size:14px;color:var(--mute)" id="sys-info"></div>
+  <div class="safe">安全運用ルール<br>・顧客の個人情報・給与情報・APIキーは保存できません（検出時は伏字にするか修正）<br>・未承認の指示は送付できません（確認用プレビューのみ）<br>・完了は「確認済の報告」がある案件のみ。例外完了は理由を記録<br>・連携トークンはこの端末だけに保存し、JSONにも含めません</div>
+  <h2>実行履歴</h2>
+  <div class="card" id="hist-list"></div>
+  <div class="stack"><button class="btn danger" data-act="reset">全データを初期化</button></div>
+  <p class="foot">Re:zenythe BM Control Ver.0.3 ・ data schema 3</p>
+</section>
+</main>
+
+<nav class="tabs"><div class="tabs-in">
+  <button data-act="go" data-v="home" class="on"><svg class="ico" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>ホーム</button>
+  <button data-act="go" data-v="meet"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><circle cx="5" cy="15" r="2.5"/><circle cx="19" cy="15" r="2.5"/><path d="M8.5 20c.6-2.3 1.9-3.5 3.5-3.5s2.9 1.2 3.5 3.5"/></svg>会議</button>
+  <button data-act="go" data-v="task"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>指示</button>
+  <button data-act="go" data-v="verify"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>検証<span class="tbadge hide" id="verify-badge"></span></button>
+  <button data-act="go" data-v="log"><svg class="ico" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>実績</button>
+</div></nav>
+
+<div id="backdrop" data-act="close"></div>
+<div id="sheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div class="sh-head"><span class="id" id="sheet-title"></span><button class="x" data-act="close" aria-label="閉じる">×</button></div>
+  <div id="sheet-body"></div>
+</div>
+<div id="dlg"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ===== BM CORE（アプリとGASで共通：入力検証・機密検出・報告解析・データ正規化） ===== */
+const CORE_VER = '0.3';
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const localDT = d => `${ymd(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+/* 全角英数記号→半角（1文字→1文字なので位置は変わらない） */
+const toHalf = s => String(s == null ? '' : s).replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/　/g,' ');
+const isTmp = id => /^tmp-/.test(String(id || ''));
+const idNum = id => { const m = String(id || '').match(/^(?:BM|RZ|L)-(\d+)$/); return m ? +m[1] : 0; };
+
+const STATUS = [['todo','未着手'],['doing','実行中'],['review','確認待ち'],['done','完了'],['hold','保留・要判断']];
+const STATUS_L = {todo:'未着手', doing:'実行中', review:'確認待ち', done:'完了', hold:'保留・要判断'};
+const APPROVAL = {pending:'未承認', approved:'承認済', rejected:'却下'};
+const PRI = {high:'高', mid:'中', low:'低'};
+const MTYPE_L = {quick:'Quick', board:'Board', project:'Project'};
+const MSTAT = {draft:'意見収集', held:'議長回答', decided:'決定済'};
+const SOURCE = {manual:'手入力', csv:'CSV取込', paste:'報告貼付', mail:'メール受信', line:'LINE受信'};
+const VERIFY = {unverified:'未確認', verified:'確認済', rejected:'差し戻し'};
+const DONE_BASIS = {verified:'報告確認済', override:'例外完了', legacy:'旧版完了'};
+const LIMIT = {topic:200, context:2000, result:20000, conclusion:200, title:120, detail:2000, content:500, short:300, category:40, company:60, reason:300, opinion:8000, minutes:10000};
+const FL = {topic:'議題', context:'背景・補足', result:'議長の回答', conclusion:'結論メモ', title:'件名', detail:'詳細・完了条件',
+  content:'作業内容', outcome:'改善成果', issue:'課題・確認事項', category:'担当区分', company:'組織名', reason:'理由', note:'差し戻し理由',
+  opinion:'意見', minutes:'議事録'};
+
+/* ---------- 入力検証 ---------- */
+function validDate(y, m, d){ const t = new Date(y, m-1, d); return t.getFullYear() === y && t.getMonth() === m-1 && t.getDate() === d; }
+/** 日付 → 'YYYY-MM-DD'、空欄 → ''、不正 → null */
+function parseDateStr(v){
+  const s = toHalf(v).trim(); if(!s) return '';
+  const m = s.match(/^(\d{4})[-\/年.](\d{1,2})[-\/月.](\d{1,2})日?$/); if(!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3];
+  if(y < 2020 || y > 2100 || !validDate(y, mo, d)) return null;
+  return `${y}-${pad(mo)}-${pad(d)}`;
+}
+/** 日時 → 'YYYY-MM-DDTHH:mm'、空欄 → ''、不正 → null */
+function parseDTStr(v){
+  const s = toHalf(v).trim(); if(!s) return '';
+  const m = s.match(/^(\d{4})[-\/年.](\d{1,2})[-\/月.](\d{1,2})日?(?:\s*\(.\))?(?:[\sT]*(\d{1,2})[:時](\d{1,2})分?(?::\d{1,2}(?:\.\d+)?)?)?$/);
+  if(!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3], h = +(m[4] || 0), mi = +(m[5] || 0);
+  if(y < 2020 || y > 2100 || !validDate(y, mo, d) || h > 23 || mi > 59) return null;
+  return `${y}-${pad(mo)}-${pad(d)}T${pad(h)}:${pad(mi)}`;
+}
+function findDate(v){ const m = toHalf(v).match(/(\d{4})[-\/年.](\d{1,2})[-\/月.](\d{1,2})/); return m ? parseDateStr(`${m[1]}-${m[2]}-${m[3]}`) : ''; }
+const futureLimit = () => { const d = new Date(); d.setDate(d.getDate() + 1); return localDT(d); };
+function parseCount(v){
+  const s = toHalf(v).replace(/[,\s]/g,'').replace(/件$/,'');
+  if(s === '' || /^(未測定|なし|-|ー|―)$/.test(s)) return {value:null};
+  if(!/^\d+$/.test(s)) return {error:`処理件数「${String(v).slice(0,20)}」は0以上の整数で入力してください`};
+  const n = +s; if(n > 100000) return {error:'処理件数が大きすぎます（上限100,000件）'};
+  return {value:n};
+}
+function parseMinutes(v){
+  const s = toHalf(v).replace(/[,\s]/g,'').toLowerCase();
+  if(s === '' || /^(未測定|なし|-|ー|―)$/.test(s)) return {value:null};
+  let n = null, m;
+  if((m = s.match(/^(\d+(?:\.\d+)?)(?:時間|h|hr|hrs|hour|hours)(?:(\d+)(?:分|m|min))?$/))) n = Math.round(+m[1]*60 + (m[2] ? +m[2] : 0));
+  else if((m = s.match(/^(\d+)(?:分|m|min|mins)?$/))) n = +m[1];
+  if(n == null) return {error:`削減時間「${String(v).slice(0,20)}」は「45」「45分」「1時間30分」の形で入力してください`};
+  if(n > 6000) return {error:'削減時間が大きすぎます（上限6,000分）'};
+  return {value:n};
+}
+/** 案件ID → 'RZ-0001'。空欄 → ''。形式不正 → error */
+function normTaskId(v){
+  const s = toHalf(v).toUpperCase().replace(/\s/g,'');
+  if(!s) return {value:''};
+  const m = s.match(/^RZ[-_]?(\d{1,6})$/);
+  if(!m) return {error:`案件ID「${String(v).slice(0,20)}」の形式が違います（例：RZ-0001）`};
+  return {value:'RZ-' + m[1].padStart(4,'0')};
+}
+const lenErr = (v, max, label) => String(v || '').length > max ? `${label}は${max}字以内にしてください（現在${String(v).length}字）` : null;
+
+/* ---------- 機密情報の検出 ---------- */
+function luhn(d){ let s = 0, alt = false; for(let i = d.length-1; i >= 0; i--){ let n = +d[i]; if(alt){ n *= 2; if(n > 9) n -= 9; } s += n; alt = !alt; } return s % 10 === 0; }
+const SENS = [
+  {k:'メールアドレス', re:/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g},
+  {k:'電話番号', pre:/[\d-]/, re:/0\d{1,4}[-‐ー−]?\d{1,4}[-‐ー−]?\d{3,4}(?![\d-])/g, ok:m => { const n = m.replace(/\D/g,'').length; return n === 10 || n === 11; }},
+  {k:'APIキー・トークン', re:/(?:sk-(?:ant-|proj-)?[A-Za-z0-9_-]{16,}|xai-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,}|xox[abprs]-[\w-]{10,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|ya29\.[\w.-]{20,}|Bearer\s+[\w.~+\/-]{20,})/g},
+  {k:'パスワード・秘密値', re:/(?:api[_ -]?key|apikey|access[_ -]?token|secret|password|passwd|パスワード|暗証番号|トークン)\s*[:=]\s*\S{4,}/gi},
+  {k:'カード番号', pre:/\d/, re:/\d(?:[ -]?\d){12,15}(?!\d)/g, ok:m => { const d = m.replace(/\D/g,''); return d.length >= 13 && d.length <= 16 && luhn(d); }},
+  {k:'個人番号（マイナンバー）', re:/(?:マイナンバー|個人番号)[^\n\d]{0,8}\d{4}[ -]?\d{4}[ -]?\d{4}|\d{4}[ -]\d{4}[ -]\d{4}(?![\d-])/g, pre:/[\d-]/},
+  {k:'口座情報', re:/(?:口座|普通預金|当座預金)[^\n]{0,10}?\d{6,8}(?!\d)/g},
+  {k:'給与・賃金の金額', re:/(?:給与|給料|賃金|手取り?|支給額|総支給|差引支給|基本給|賞与|ボーナス|時給|日給|月給|年収|残業代)[^\n]{0,10}?(?:[¥￥]\s?\d[\d,]*|\d[\d,]*(?:\.\d+)?\s*(?:円|万円|万|千円))/g},
+  {k:'住所', re:/〒\s?\d{3}-?\d{4}|住所\s*[:]\s*\S{2,}|[都道府県][^\s、。]{0,8}?[市区町村][^\s、。]{0,12}?\d+(?:[-ー－−]\d+){1,2}/g},
+  {k:'生年月日', re:/(?:生年月日|誕生日)[^\n\d]{0,6}\d{2,4}[年\/.-]\d{1,2}/g}
+];
+function scanText(t){
+  const src = String(t == null ? '' : t); if(!src) return [];
+  const h = toHalf(src), hits = [];
+  for(const r of SENS){
+    r.re.lastIndex = 0; let m;
+    while((m = r.re.exec(h))){
+      if(!m[0]){ r.re.lastIndex++; continue; }
+      if(r.pre && m.index > 0 && r.pre.test(h[m.index - 1])){ r.re.lastIndex = m.index + 1; continue; }
+      if(r.ok && !r.ok(m[0])) continue;
+      hits.push({k:r.k, start:m.index, end:m.index + m[0].length, text:src.slice(m.index, m.index + m[0].length)});
+    }
+  }
+  return hits;
+}
+function maskText(t){
+  const src = String(t == null ? '' : t); const hits = scanText(src).sort((a,b) => a.start - b.start || b.end - a.end);
+  let out = '', pos = 0;
+  for(const x of hits){ if(x.start < pos) continue; out += src.slice(pos, x.start) + `［伏字:${x.k}］`; pos = x.end; }
+  return out + src.slice(pos);
+}
+const peek = s => { s = String(s); return s.length <= 3 ? '＊＊＊' : s.slice(0,2) + '＊'.repeat(Math.min(6, s.length - 2)); };
+function scanFields(obj, labels){
+  labels = labels || FL; const hits = [];
+  Object.keys(obj).forEach(k => scanText(obj[k]).forEach(h => hits.push({field:labels[k] || k, k:h.k, sample:peek(h.text)})));
+  return hits;
+}
+
+/* ---------- 報告（完了報告フォーマット）の解析 ---------- */
+function splitReports(text){
+  const out = [];
+  String(text || '').replace(/\r\n?/g,'\n').split(/\n(?=[ \t　]*案件ID[：:])/).forEach(b => {
+    const g = re => { const m = b.match(re); return m ? m[1].trim() : ''; };
+    const r = {
+      taskId:g(/案件ID[：:][ \t　]*([^\n]*)/), datetime:g(/実施日時[：:][ \t　]*([^\n]*)/), category:g(/担当区分[：:][ \t　]*([^\n]*)/),
+      content:g(/作業内容[：:][ \t　]*([^\n]*)/), count:g(/処理件数[：:][ \t　]*([^\n]*)/), savedMin:g(/削減時間[^：:\n]*[：:][ \t　]*([^\n]*)/),
+      outcome:g(/改善成果[：:][ \t　]*([^\n]*)/), issue:g(/課題[^：:\n]*[：:][ \t　]*([^\n]*)/)
+    };
+    if(/^YYYY/i.test(r.datetime)) r.datetime = '';
+    ['count','savedMin'].forEach(k => { if(/^[（(].*[）)]$/.test(r[k])) r[k] = ''; });
+    if(!r.taskId && !r.content) return;
+    out.push(r);
+  });
+  return out;
+}
+/** 実績1件（文字列）→ 検証済みの値・エラー・機密検出。taskLookup(id) → 案件 or null */
+function prepareLogCore(raw, opt){
+  opt = opt || {};
+  const errors = [], v = {source:opt.source || 'manual', verify:'unverified', verifyNote:'', verifiedAt:''};
+  const dt = parseDTStr(raw.datetime);
+  if(dt === '') errors.push('日時が空欄です');
+  else if(dt === null) errors.push(`日時「${String(raw.datetime).slice(0,25)}」を読めません（例：2026-10-17 15:00）`);
+  else if(dt > futureLimit()) errors.push(`日時 ${dt.replace('T',' ')} が未来になっています`);
+  else v.datetime = dt;
+  v.content = String(raw.content == null ? '' : raw.content).trim();
+  if(!v.content) errors.push('作業内容が空欄です');
+  [['content', LIMIT.content], ['category', LIMIT.category], ['outcome', LIMIT.short], ['issue', LIMIT.short]].forEach(([k, max]) => {
+    if(k !== 'content') v[k] = String(raw[k] == null ? '' : raw[k]).trim();
+    const e = lenErr(v[k], max, FL[k]); if(e) errors.push(e);
+  });
+  const c = parseCount(raw.count);   if(c.error) errors.push(c.error); else v.count = c.value;
+  const s = parseMinutes(raw.savedMin); if(s.error) errors.push(s.error); else v.savedMin = s.value;
+  const tid = normTaskId(raw.taskId); if(tid.error) errors.push(tid.error); else v.taskId = tid.value;
+  const look = opt.taskLookup || (() => null);
+  const task = v.taskId ? look(v.taskId) : null;
+  if(task && !v.category) v.category = task.assignee || '';
+  const unknown = !!(v.taskId && !task);
+  const sens = scanFields({content:v.content, outcome:v.outcome, issue:v.issue, category:v.category});
+  return {rowLabel:opt.rowLabel || '', v, errors, unknown, sens, dup:false};
+}
+/** 共通の重複判定キー：日時（分）＋案件ID＋作業内容（空白・全半角を正規化） */
+const fp = l => `${String(l.datetime || '').slice(0,16)}|${String(l.taskId || '').toUpperCase()}|${toHalf(l.content || '').replace(/\s+/g,'').toLowerCase()}`;
+const contentKey = l => toHalf(l.content || '').replace(/\s+/g,'').toLowerCase();
+
+/* ---------- データ正規化（アプリ・シートで同じ形にそろえる） ---------- */
+const str = v => v == null ? '' : String(v);
+const numOrNull = v => (v === null || v === undefined || v === '' || !isFinite(+v)) ? null : Math.max(0, Math.round(+v));
+const pick = (v, dict, def) => Object.prototype.hasOwnProperty.call(dict, v) ? v : def;
+function normMeeting(m){
+  const ops = {}, src = (m.opinions && typeof m.opinions === 'object') ? m.opinions : {};
+  Object.keys(src).sort().forEach(k => { const o = src[k] || {}; ops[k] = {text:str(o.text), at:str(o.at), sentAt:str(o.sentAt)}; });
+  return {id:str(m.id), type:pick(m.type, MTYPE_L, 'quick'), topic:str(m.topic), context:str(m.context),
+    participants:Array.isArray(m.participants) ? m.participants.map(str).filter(Boolean) : [], opinions:ops,
+    prompt:str(m.prompt), result:str(m.result), conclusion:str(m.conclusion), minutes:str(m.minutes),
+    status:pick(m.status, MSTAT, 'draft'), createdAt:str(m.createdAt), updatedAt:str(m.updatedAt)};
+}
+function normTask(t){
+  return {id:str(t.id), meetingId:str(t.meetingId), title:str(t.title), detail:str(t.detail), assignee:str(t.assignee) || 'Grok Bot',
+    priority:pick(t.priority, PRI, 'mid'), due:parseDateStr(t.due) || '', approval:pick(t.approval, APPROVAL, 'pending'),
+    status:pick(t.status, STATUS_L, 'todo'), instruction:str(t.instruction),
+    sends:Array.isArray(t.sends) ? t.sends.filter(s => s && s.at).map(s => s.kind ? {at:str(s.at), to:str(s.to), kind:str(s.kind)} : {at:str(s.at), to:str(s.to)}) : [],
+    doneBasis:pick(t.doneBasis, DONE_BASIS, ''), doneReason:str(t.doneReason), createdAt:str(t.createdAt), updatedAt:str(t.updatedAt)};
+}
+function normLog(l){
+  return {id:str(l.id), taskId:str(l.taskId), datetime:parseDTStr(l.datetime) || str(l.datetime), category:str(l.category), content:str(l.content),
+    count:numOrNull(l.count), savedMin:numOrNull(l.savedMin), outcome:str(l.outcome), issue:str(l.issue),
+    source:pick(l.source, SOURCE, 'manual'), verify:pick(l.verify, VERIFY, 'unverified'), verifyNote:str(l.verifyNote), verifiedAt:str(l.verifiedAt),
+    updatedAt:str(l.updatedAt)};
+}
+function normHistory(h){ return {id:str(h.id), at:str(h.at), action:str(h.action), target:str(h.target), detail:str(h.detail).slice(0,200), device:str(h.device)}; }
+const NORM = {meetings:normMeeting, tasks:normTask, logs:normLog};
+
+
+/* =====================================================================
+   Re:zenythe BM Control Ver.0.3（アプリ本体）
+   ===================================================================== */
+const APP_VER = '0.3', SCHEMA = 3;
+const KEY = 'rz_bm_control_v03';
+const PREV_KEYS = ['rz_bm_control_v02', 'rz_bm_control_v01'];   // 旧版のデータ（移行後も削除しない）
+const CONN_KEY = 'rz_bm_conn_v03', SYNC_KEY = 'rz_bm_sync_v03';
+const DEFAULT_COMPANY = 'Re:zenythe BM';
+const DEFAULT_AIS = [
+  {name:'ChatGPT',     url:'https://chatgpt.com/',           role:'議長',       lens:'推進案を出し、全員の意見を比較して結論と実行指示をまとめる'},
+  {name:'Claude',      url:'https://claude.ai/',             role:'ブレーキ',   lens:'リスク、抜け漏れ、やらない方がよい理由、前提の弱さ'},
+  {name:'Gemini',      url:'https://gemini.google.com/',     role:'中立・調査', lens:'事実確認、調べるべき情報、見落としている別の選択肢'},
+  {name:'Copilot',     url:'https://copilot.microsoft.com/', role:'数字・検証', lens:'費用・時間・効果の見積もりと、その根拠・前提'},
+  {name:'NotebookLM',  url:'https://notebooklm.google.com/', role:'議事録',     lens:'決定事項・論点・宿題を整理した議事録と、今後の展開予測'},
+  {name:'Grok Bot',    url:'https://grok.com/',              role:'現場実行',   lens:''},
+  {name:'nozu（人間）', url:'',                               role:'最終決裁',   lens:''}
+];
+const DEFAULT_MEMBERS = {quick:[], project:['Claude'], board:['Claude','Gemini','Copilot']};
+const MTYPE = {quick:{l:'Quick',j:'即決会議'}, board:{l:'Board',j:'経営戦略会議'}, project:{l:'Project',j:'プロジェクト実行会議'}};
+const PRI_ORDER = {high:0, mid:1, low:2};
+const REPORT_STATE = {none:'報告なし', received:'報告未確認', verified:'報告確認済', returned:'差し戻し中'};
+const RS_CLS = {none:'', received:'warn', verified:'em', returned:'danger'};
+
+/* ================= ユーティリティ ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => ymd(new Date());
+const nowLocal = () => localDT(new Date());
+const nowISO = () => new Date().toISOString();
+const fmtDT = s => s ? String(s).replace('T',' ').slice(0,16) : '—';
+const fmtShort = s => s ? localDT(new Date(s)).slice(5,16).replace('T',' ').replace('-','/') : '';
+const fmtMin = m => m == null ? '未測定' : (m >= 60 ? `${Math.floor(m/60)}時間${m%60 ? (m%60)+'分' : ''}` : `${m}分`);
+const fmtMinHTML = m => m == null ? '<span class="unm">未測定</span>' : (m >= 60 ? `${Math.floor(m/60)}<small>時間</small>${m%60 ? (m%60)+'<small>分</small>' : ''}` : `${m}<small>分</small>`);
+const dispId = id => isTmp(id) ? '付番待ち' : id;
+const idTag = id => `<span class="id ${isTmp(id) ? 'tmp' : ''}">${esc(dispId(id))}</span>`;
+const stamp = () => { const d = new Date(); return `${ymd(d).replace(/-/g,'')}_${pad(d.getHours())}${pad(d.getMinutes())}`; };
+const aiNames = () => S.settings.ais.map(a => a.name);
+const aiByName = n => S.settings.ais.find(a => a.name === n);
+const execAI = () => S.settings.ais.find(a => /実行/.test(a.role)) || aiByName('Grok Bot') || null;
+const isHumanAI = a => /決裁|人間/.test(a.role + a.name);
+const memberCandidates = () => S.settings.ais.filter(a => a.name !== S.settings.chair && a.name !== S.settings.scribe && !/実行/.test(a.role) && !isHumanAI(a)).map(a => a.name);
+function canon(v){
+  if(v === null || typeof v !== 'object') return JSON.stringify(v === undefined ? null : v);
+  if(Array.isArray(v)) return '[' + v.map(canon).join(',') + ']';
+  return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+}
+function hashStr(s){ let h = 5381; for(let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + s.length.toString(36); }
+
+/* ================= 機密情報のガード（全経路共通） ================= */
+async function guardFields(obj, labels = FL){
+  const hits = scanFields(obj, labels);
+  if(!hits.length) return obj;
+  const list = hits.slice(0,8).map(h => `・${h.field}：${h.k}（${h.sample}）`).join('\n') + (hits.length > 8 ? `\n…ほか${hits.length-8}件` : '');
+  const c = await choose('機密情報は保存できません',
+    `次の内容が含まれています：\n${list}\n\n個人情報・給与情報・APIキーはこのアプリに保存しない方針です。修正するか、該当部分を伏字にして続けてください。`,
+    [['戻って修正','cancel','ghost'], ['伏字にして続ける','mask','warn']]);
+  if(c !== 'mask') return null;
+  const out = {}; for(const [k, v] of Object.entries(obj)) out[k] = maskText(v);
+  return out;
+}
+
+/* ================= データ層・移行 ================= */
+function normSettings(s){
+  s = s || {};
+  const ais = (Array.isArray(s.ais) && s.ais.length ? s.ais : DEFAULT_AIS).filter(a => a && a.name).map(a => {
+    const def = DEFAULT_AIS.find(d => d.name === a.name) || {};
+    return {name:String(a.name).slice(0,30), url:/^https:\/\//.test(a.url || '') ? a.url : '', role:String(a.role || def.role || '').slice(0,20), lens:String(a.lens ?? def.lens ?? '').slice(0,200)};
+  });
+  const names = ais.map(a => a.name);
+  const chair = names.includes(s.chair) ? s.chair : (names.includes('ChatGPT') ? 'ChatGPT' : names[0]);
+  const scribe = s.scribe === '' ? '' : (names.includes(s.scribe) ? s.scribe : (names.includes('NotebookLM') ? 'NotebookLM' : ''));
+  const verifier = names.includes(s.verifier) ? s.verifier : (names.includes('Claude') ? 'Claude' : chair);
+  const mem = s.members && typeof s.members === 'object' ? s.members : DEFAULT_MEMBERS;
+  const members = {};
+  ['quick','project','board'].forEach(k => { members[k] = (Array.isArray(mem[k]) ? mem[k] : DEFAULT_MEMBERS[k]).filter(n => names.includes(n) && n !== chair); });
+  return {startDate:parseDateStr(s.startDate) || today(), company:String(s.company || DEFAULT_COMPANY).slice(0,60), chair, scribe, verifier, ais, members};
+}
+function fresh(){
+  return {version:APP_VER, schema:SCHEMA, seq:{m:0,t:0,l:0}, settings:normSettings({}), meetings:[], tasks:[], logs:[], history:[],
+    meta:{createdAt:nowISO(), lastExport:''}};
+}
+const newHistId = () => 'H-' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+/** どの版のデータでも Ver.0.3 形式へ（元データは変更しない） */
+function migrate(src){
+  const d = JSON.parse(JSON.stringify(src || {}));
+  const f = fresh(), notes = [];
+  const fromVer = d.version || '不明';
+  const out = {...f, meta:{...f.meta, ...(d.meta || {})}};
+  const st = d.settings || {};
+  let ais = st.ais;
+  if(!Array.isArray(ais) || !ais.length){
+    const names = Array.isArray(st.assignees) && st.assignees.length ? st.assignees : DEFAULT_AIS.map(a => a.name);
+    ais = [...new Set(names.map(n => String(n).trim()).filter(Boolean))].map(n => DEFAULT_AIS.find(a => a.name === n) || {name:n, url:'', role:''});
+    if(Array.isArray(st.assignees)) notes.push('担当AIリストを「AI設定（名前・起動URL・役割・観点）」に変換しました');
+  }
+  out.settings = normSettings({...st, ais});
+  if(/\u65B0\u9BAE\u7D44|re:zenith（/i.test(out.settings.company)){ notes.push(`組織名を「${DEFAULT_COMPANY}」に変更しました`); out.settings.company = DEFAULT_COMPANY; }
+  out.meetings = (Array.isArray(d.meetings) ? d.meetings : []).filter(m => m && m.id).map(m => normMeeting(m));
+  let promptFix = 0;
+  out.meetings.forEach(m => { if(/^組織：.*(\u65B0\u9BAE\u7D44|re:zenith（)/im.test(m.prompt)){ m.prompt = m.prompt.replace(/^組織：.*$/m, `組織：${out.settings.company}`); promptFix++; } });
+  if(promptFix) notes.push(`保存済み会議プロンプト${promptFix}件の組織名を更新しました`);
+  let legacyDone = 0;
+  out.tasks = (Array.isArray(d.tasks) ? d.tasks : []).filter(t => t && t.id).map(t => {
+    const x = normTask(t);
+    if(x.status === 'done' && !x.doneBasis){ x.doneBasis = 'legacy'; legacyDone++; }
+    return x;
+  });
+  if(legacyDone) notes.push(`旧版で完了にした案件${legacyDone}件は「旧版完了（報告未確認）」として残しました`);
+  out.logs = (Array.isArray(d.logs) ? d.logs : []).filter(l => l && l.id).map(l => normLog(l));
+  const hs = Array.isArray(d.history) ? d.history.filter(h => h && h.at) : [];
+  const seenH = new Set();
+  out.history = hs.map((h, i) => { const x = normHistory(h); if(!x.id || seenH.has(x.id)) x.id = `H-${new Date(x.at).getTime().toString(36) || 'old'}-${i}`; seenH.add(x.id); return x; });
+  const seq = {m:+(d.seq?.m) || 0, t:+(d.seq?.t) || 0, l:+(d.seq?.l) || 0};
+  [['meetings','m','BM-',4],['tasks','t','RZ-',4],['logs','l','L-',5]].forEach(([k, s, p, w]) => {
+    seq[s] = Math.max(seq[s], ...out[k].map(x => idNum(x.id)), 0);
+    const seen = new Set();
+    out[k].forEach(x => { if(seen.has(x.id)){ const old = x.id; x.id = p + String(++seq[s]).padStart(w,'0'); notes.push(`重複していたID ${old} を ${x.id} に振り直しました`); } seen.add(x.id); });
+  });
+  out.seq = seq;
+  out.version = APP_VER; out.schema = SCHEMA;
+  if(fromVer !== APP_VER){ out.meta.migratedFrom = fromVer; out.meta.migratedAt = nowISO(); }
+  return {data:out, notes, legacyDone, fromVer};
+}
+
+let BOOT = {};
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
+function load(){
+  const raw = lsGet(KEY);
+  if(raw){
+    try{ return migrate(JSON.parse(raw)).data; }
+    catch(e){ lsSet(`${KEY}_corrupt_${Date.now()}`, raw); BOOT = {corrupt:true}; }
+  }
+  for(const k of PREV_KEYS){
+    const old = lsGet(k); if(!old) continue;
+    try{ const r = migrate(JSON.parse(old)); BOOT = {...BOOT, migrated:true, notes:r.notes, fromVer:r.fromVer, fromKey:k}; return r.data; }
+    catch(e){ BOOT.oldCorrupt = true; }
+  }
+  BOOT.fresh = true; return fresh();
+}
+let S = load();
+let SUPPRESS_SYNC = false;
+function save(){
+  if(!lsSet(KEY, JSON.stringify(S))){ toast('⚠ 保存に失敗しました（容量不足）。JSON書き出しでバックアップしてください'); return false; }
+  if(!SUPPRESS_SYNC) scheduleSync();
+  return true;
+}
+function hist(action, target, detail = ''){
+  S.history.unshift({id:newHistId(), at:nowISO(), action, target:String(target), detail:String(detail).slice(0,200), device:CONN.device || ''});
+  if(S.history.length > 3000) S.history.length = 3000;
+}
+function commit(action, target, detail){ hist(action, target, detail); save(); renderAll(); }
+function backup(){ lsSet(KEY + '_backup', JSON.stringify(S)); }
+const rndId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const nid = {
+  m: () => CONN.mode === 'sheet' ? `tmp-m-${rndId()}` : `BM-${String(++S.seq.m).padStart(4,'0')}`,
+  t: () => CONN.mode === 'sheet' ? `tmp-t-${rndId()}` : `RZ-${String(++S.seq.t).padStart(4,'0')}`,
+  l: () => CONN.mode === 'sheet' ? `tmp-l-${rndId()}` : `L-${String(++S.seq.l).padStart(5,'0')}`
+};
+let RENAMED = {};
+const rid = id => RENAMED[id] || id;
+const taskById = id => S.tasks.find(t => t.id === rid(id));
+const meetById = id => S.meetings.find(m => m.id === rid(id));
+const logById  = id => S.logs.find(l => l.id === rid(id));
+function normAssignee(v){
+  const s = String(v || '').trim(); if(!s) return '';
+  if(/grok/i.test(s)) return aiNames().find(n => /grok/i.test(n)) || '';
+  const low = s.toLowerCase();
+  return aiNames().find(a => a.toLowerCase() === low) || aiNames().find(a => a.replace(/（.*?）/,'').toLowerCase() === low.replace(/（.*?）/,'')) || '';
+}
+
+/* ================= 報告の状態 ================= */
+const taskReports = t => S.logs.filter(l => l.taskId === t.id);
+function reportState(t){
+  const r = taskReports(t); if(!r.length) return 'none';
+  if(r.some(l => l.verify === 'verified')) return 'verified';
+  if(r.some(l => l.verify === 'unverified')) return 'received';
+  return 'returned';
+}
+const canSend = t => t.approval === 'approved' && t.status !== 'done' && t.status !== 'hold' && !isTmp(t.id);
+const lastSend = t => t.sends && t.sends.length ? t.sends[t.sends.length-1] : null;
+
+/* ================= スプレッドシート連携（同期） ================= */
+function loadJSON(k, def){ try{ return {...def, ...(JSON.parse(lsGet(k) || 'null') || {})}; }catch(e){ return {...def}; } }
+const guessDevice = () => { const u = navigator.userAgent || ''; return /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'iPad' : /Mac/.test(u) ? 'Mac' : /Windows/.test(u) ? 'PC' : '端末'; };
+let CONN = loadJSON(CONN_KEY, {mode:'local', url:'', token:'', device:'', lastSync:'', lastError:''});
+if(!CONN.device) CONN.device = guessDevice();
+const emptyHashes = () => ({meetings:{}, tasks:{}, logs:{}, settings:'', history:{}});
+let SY = loadJSON(SYNC_KEY, {h:emptyHashes()});
+if(!SY.h) SY.h = emptyHashes();
+function saveConn(){ lsSet(CONN_KEY, JSON.stringify(CONN)); }
+function saveSY(){ lsSet(SYNC_KEY, JSON.stringify(SY)); }
+let SYNCING = false, SYNC_TIMER = null, SYNC_STATE = 'local', SYNC_CHAIN = 0;
+const recHash = (kind, r) => { const x = {...NORM[kind](r)}; delete x.updatedAt; return hashStr(canon(x)); };
+const setHash = s => hashStr(canon(normSettings(s)));
+function setSyncState(st){
+  SYNC_STATE = st;
+  const d = $('#sync-dot'); if(d) d.className = 'dot ' + (st === 'syncing' ? 'pending' : st);
+}
+function pendingChanges(){ return CONN.mode === 'sheet' ? collectChanges(true).count : 0; }
+function collectChanges(dry = false){
+  const ch = {meetings:[], tasks:[], logs:[], settings:null, history:[]}, sent = {meetings:{}, tasks:{}, logs:{}, settings:''};
+  let count = 0; const at = nowISO();
+  ['meetings','tasks','logs'].forEach(k => {
+    const seen = new Set();
+    S[k].forEach(r => {
+      seen.add(r.id); const h = recHash(k, r); sent[k][r.id] = h;
+      if(SY.h[k][r.id] !== h){ count++; if(!dry){ r.updatedAt = at; ch[k].push(NORM[k](r)); } }
+    });
+    Object.keys(SY.h[k]).forEach(id => { if(!seen.has(id)){ count++; if(!dry) ch[k].push({id, deleted:true, updatedAt:at}); } });
+  });
+  const sh = setHash(S.settings); sent.settings = sh;
+  if(SY.h.settings !== sh){ count++; if(!dry) ch.settings = {data:normSettings(S.settings), updatedAt:at}; }
+  const hs = S.history.filter(h => !SY.h.history[h.id]);
+  count += hs.length; if(!dry) ch.history = hs.slice(0, 500).map(normHistory);
+  return {ch, sent, count};
+}
+function scheduleSync(ms = 1500, chained = false){
+  if(CONN.mode !== 'sheet') return;
+  SYNC_CHAIN = chained ? SYNC_CHAIN + 1 : 0;
+  if(SYNC_CHAIN > 3) return;
+  setSyncState('pending');
+  clearTimeout(SYNC_TIMER); SYNC_TIMER = setTimeout(() => sync(), ms);
+}
+async function api(action, payload = {}){
+  if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(CONN.url)) throw new Error('連携URLが正しくありません');
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  const tm = ctl ? setTimeout(() => ctl.abort(), 25000) : null;
+  let res;
+  try{
+    res = await fetch(CONN.url, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action, token:CONN.token, device:CONN.device, ...payload}), redirect:'follow', signal:ctl ? ctl.signal : undefined});
+  }catch(e){ throw new Error(e && e.name === 'AbortError' ? '通信がタイムアウトしました' : '通信できませんでした（電波・URLを確認）'); }
+  finally{ if(tm) clearTimeout(tm); }
+  let j; try{ j = await res.json(); }catch(e){ throw new Error('シート側の応答を読めません（URL・公開設定を確認）'); }
+  if(!j || !j.ok) throw new Error((j && j.error) || 'シート側でエラーが発生しました');
+  return j;
+}
+function renameIds(map, sent){
+  const keys = Object.keys(map); if(!keys.length) return;
+  Object.assign(RENAMED, map);
+  ['meetings','tasks','logs'].forEach(k => S[k].forEach(r => { if(map[r.id]) r.id = map[r.id]; }));
+  S.tasks.forEach(t => { if(map[t.meetingId]) t.meetingId = map[t.meetingId]; });
+  S.logs.forEach(l => { if(map[l.taskId]) l.taskId = map[l.taskId]; });
+  const rep = s => keys.reduce((a, k) => a.split(k).join(map[k]), String(s));
+  S.history.forEach(h => { h.target = rep(h.target); h.detail = rep(h.detail); });
+  if(sent) ['meetings','tasks','logs'].forEach(k => keys.forEach(o => { if(sent[k][o] !== undefined){ sent[k][map[o]] = sent[k][o]; delete sent[k][o]; } }));
+  if(editingTask && map[editingTask]) editingTask = map[editingTask];
+  if(OPEN && map[OPEN.id]) OPEN.id = map[OPEN.id];
+}
+const idSort = (a, b) => (isTmp(a.id) - isTmp(b.id)) || (idNum(a.id) - idNum(b.id)) || (a.id < b.id ? -1 : 1);
+function applyServer(res, sent, {adoptSettings = false} = {}){
+  renameIds(res.idMap || {}, sent);
+  const data = res.data || {};
+  ['meetings','tasks','logs'].forEach(k => {
+    const server = (data[k] || []).map(NORM[k]);
+    const serverIds = new Set(server.map(r => r.id));
+    const deleted = new Set((data.deleted && data.deleted[k]) || []);
+    const local = new Map(S[k].map(r => [r.id, r]));
+    const out = [], newH = {};
+    server.forEach(sr => {
+      const lr = local.get(sr.id);
+      newH[sr.id] = recHash(k, sr);
+      if(lr && sent[k][sr.id] !== undefined && recHash(k, lr) !== sent[k][sr.id]) out.push(lr);   // 送信中に変更された → 端末側を残す（次回送信）
+      else out.push(sr);
+    });
+    S[k].forEach(lr => {
+      if(serverIds.has(lr.id) || deleted.has(lr.id)) return;
+      if(sent[k][lr.id] === undefined || isTmp(lr.id)) out.push(lr);   // 送信中に作成された → 次回送信
+    });
+    S[k] = out.sort(idSort);
+    SY.h[k] = newH;
+  });
+  if(data.settings && data.settings.data){
+    const sv = normSettings(data.settings.data);
+    if(adoptSettings || setHash(S.settings) === sent.settings) S.settings = sv;
+    SY.h.settings = setHash(sv);
+  }
+  const hs = (data.history || []).map(normHistory);
+  const have = new Set(S.history.map(h => h.id));
+  hs.forEach(h => { if(!have.has(h.id)) S.history.push(h); SY.h.history[h.id] = 1; });
+  (res.historyAccepted || []).forEach(id => { SY.h.history[id] = 1; });
+  S.history.sort((a, b) => a.at < b.at ? 1 : a.at > b.at ? -1 : 0);
+  if(S.history.length > 3000) S.history.length = 3000;
+  const keepH = {}; S.history.forEach(h => { if(SY.h.history[h.id]) keepH[h.id] = 1; }); SY.h.history = keepH;
+}
+async function sync({pullOnly = false, adoptSettings = false, quiet = false} = {}){
+  if(CONN.mode !== 'sheet' || SYNCING) return false;
+  SYNCING = true; setSyncState('syncing');
+  const {ch, sent} = pullOnly ? {ch:{}, sent:collectChanges(true).sent} : collectChanges();
+  if(pullOnly){ ['meetings','tasks','logs'].forEach(k => { sent[k] = {}; }); sent.settings = ''; }
+  let res;
+  try{ res = await api('sync', {changes:ch}); }
+  catch(e){
+    CONN.lastError = e.message; saveConn(); SYNCING = false; setSyncState('error');
+    if(!quiet) toast('同期できませんでした：' + e.message);
+    renderSyncBits(); return false;
+  }
+  applyServer(res, sent, {adoptSettings: adoptSettings || pullOnly});
+  CONN.lastSync = nowISO(); CONN.lastError = ''; saveConn(); saveSY();
+  SUPPRESS_SYNC = true; save(); SUPPRESS_SYNC = false;
+  SYNCING = false;
+  renderAll(); refreshOpenSheet();
+  if(res.conflicts) toast(`${res.conflicts}件はシート側の新しい内容を優先しました`);
+  const left = collectChanges(true).count;
+  setSyncState(left ? 'pending' : 'ok');
+  if(left) scheduleSync(800, true);
+  return true;
+}
+function renderSyncBits(){ if(view === 'set') renderConn(); renderHeader(); }
+
+/* ================= UI部品 ================= */
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2800); }
+function choose(title, msg, buttons){
+  return new Promise(res => {
+    const d = $('#dlg');
+    const cls = buttons.length === 2 ? 'row2' : 'stack';
+    d.innerHTML = `<div class="dlg-box" role="alertdialog" aria-label="${esc(title)}"><h3>${esc(title)}</h3><p>${esc(msg)}</p><div class="${cls}">${buttons.map(([l, v, c]) => `<button class="btn ${c || ''}" data-r="${esc(v)}">${esc(l)}</button>`).join('')}</div></div>`;
+    d.classList.add('show');
+    d.onclick = e => { const b = e.target.closest('[data-r]'); if(!b) return; d.classList.remove('show'); d.onclick = null; res(b.dataset.r); };
+  });
+}
+const ask = async (title, msg, okLabel = '実行する', danger = false) => (await choose(title, msg, [['キャンセル','0','ghost'], [okLabel,'1', danger ? 'danger' : 'primary']])) === '1';
+const showErrors = (title, errs) => choose(title, errs.slice(0,12).map(e => '・' + e).join('\n') + (errs.length > 12 ? `\n…ほか${errs.length-12}件` : ''), [['戻って修正','ok','primary']]);
+function promptText(title, msg, {placeholder = '', min = 2, max = LIMIT.reason, okLabel = '決定', danger = false} = {}){
+  return new Promise(res => {
+    const d = $('#dlg');
+    d.innerHTML = `<div class="dlg-box"><h3>${esc(title)}</h3><p>${esc(msg)}</p><textarea class="in" id="dlg-text" maxlength="${max}" placeholder="${esc(placeholder)}" style="margin-top:10px;min-height:90px" aria-label="${esc(title)}"></textarea><div class="row2"><button class="btn ghost" data-r="0">キャンセル</button><button class="btn ${danger ? 'danger' : 'primary'}" data-r="1">${esc(okLabel)}</button></div></div>`;
+    d.classList.add('show');
+    d.onclick = e => {
+      const b = e.target.closest('[data-r]'); if(!b) return;
+      const v = $('#dlg-text').value.trim();
+      if(b.dataset.r === '1' && v.length < min){ toast(`${min}文字以上で入力してください`); return; }
+      d.classList.remove('show'); d.onclick = null; res(b.dataset.r === '1' ? v : null);
+    };
+  });
+}
+let OPEN = null;
+function openSheet(title, html, ref = null){ OPEN = ref; $('#sheet-title').textContent = title; $('#sheet-body').innerHTML = html; $('#sheet').classList.add('show'); $('#backdrop').classList.add('show'); }
+function closeSheet(){ OPEN = null; $('#sheet').classList.remove('show'); $('#backdrop').classList.remove('show'); }
+function refreshOpenSheet(){
+  if(!OPEN || !$('#sheet').classList.contains('show')) return;
+  const a = document.activeElement; if(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && $('#sheet').contains(a)) return;
+  if([...$$('#sheet-body textarea')].some(t => t.dataset.dirty)) return;
+  const ex = $('#extract-area'); if(ex && ex.children.length) return;
+  if($('#dlg').classList.contains('show')) return;
+  const st = $('#sheet-body').scrollTop;
+  if(OPEN.kind === 'task' && taskById(OPEN.id)) openTask(OPEN.id);
+  else if(OPEN.kind === 'meet' && meetById(OPEN.id)) openMeet(OPEN.id);
+  else if(OPEN.kind === 'sync') openSync();
+  $('#sheet-body').scrollTop = st;
+}
+
+function execCopy(t){
+  const ta = document.createElement('textarea');
+  ta.value = t; ta.setAttribute('readonly',''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px';
+  document.body.appendChild(ta); ta.focus(); ta.select(); try{ ta.setSelectionRange(0, t.length); }catch(e){}
+  let ok = false; try{ ok = document.execCommand('copy'); }catch(e){}
+  ta.remove(); return ok;
+}
+function manualCopySheet(t){ openSheet('手動コピー', `<p class="note" style="margin-top:0">長押しして「すべてを選択」→「コピー」してください。</p><textarea class="in" style="min-height:300px" aria-label="コピーする文章">${esc(t)}</textarea>`); }
+async function copyText(t){
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); toast('コピーしました'); return true; } }catch(e){}
+  if(execCopy(t)){ toast('コピーしました'); return true; }
+  manualCopySheet(t); return false;
+}
+/** タップ操作の中で同期的に：コピー → AIアプリ（URL）を開く（iOSのポップアップ制限対策で await しない） */
+function copyThenOpen(text, url){
+  let started = false;
+  if(navigator.clipboard && window.isSecureContext){
+    try{ navigator.clipboard.writeText(text).then(() => toast('コピーしました。貼り付けて送信してください'), () => { if(!execCopy(text)) manualCopySheet(text); }); started = true; }catch(e){}
+  }
+  if(!started){ if(execCopy(text)) toast('コピーしました。貼り付けて送信してください'); else { manualCopySheet(text); return; } }
+  if(url && /^https:\/\//.test(url)){
+    const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+}
+function download(name, content, type){
+  const blob = new Blob([content], {type});
+  const file = typeof File === 'function' ? new File([blob], name, {type}) : null;
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if(isIOS && file && navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file], title:name}).catch(() => {}); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+/* ================= CSV ================= */
+function parseCSV(text){
+  text = String(text).replace(/^﻿/, '');
+  const first = text.split(/\r?\n/)[0] || '';
+  const delim = (first.includes('\t') && !first.includes(',')) ? '\t' : ',';
+  const rows = []; let row = [], f = '', q = false;
+  for(let i = 0; i < text.length; i++){
+    const c = text[i];
+    if(q){ if(c === '"'){ if(text[i+1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+    else if(c === '"' && f === '') q = true;
+    else if(c === delim){ row.push(f); f = ''; }
+    else if(c === '\n'){ row.push(f); rows.push(row); row = []; f = ''; }
+    else if(c !== '\r') f += c;
+  }
+  if(f !== '' || row.length){ row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => String(x).trim() !== ''));
+}
+function toCSV(rows){
+  return '﻿' + rows.map(r => r.map(v => {
+    v = v == null ? '' : String(v);
+    if(/^[=+\-@\t\r]/.test(v) && !/^-?\d/.test(v)) v = "'" + v;
+    return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+  }).join(',')).join('\r\n');
+}
+async function readFileText(file){
+  const buf = await file.arrayBuffer();
+  try{ return new TextDecoder('utf-8', {fatal:true}).decode(buf); }
+  catch(e){ try{ return new TextDecoder('shift_jis').decode(buf); }catch(e2){ return new TextDecoder('utf-8').decode(buf); } }
+}
+const FIELD_ALIASES = {
+  datetime:['日時','実施日時','日付','時刻','タイムスタンプ','date','datetime','timestamp'],
+  category:['担当区分','区分','担当','カテゴリ','部門','category'],
+  content:['作業内容','業務内容','内容','作業','content','task'],
+  taskId:['案件ID','案件','taskid','task_id'],
+  count:['処理件数','件数','count'],
+  savedMin:['削減時間(分)','削減時間','削減分','saved_min','saved'],
+  outcome:['改善成果','成果','outcome','備考','メモ','note'],
+  issue:['課題・確認事項','課題','issue']
+};
+const FIELD_L = {datetime:'日時', category:'担当区分', content:'作業内容', taskId:'案件ID', count:'処理件数', savedMin:'削減時間', outcome:'改善成果', issue:'課題'};
+const normH = h => toHalf(h).toLowerCase().replace(/[\s()]/g,'');
+function mapHeaders(headers){
+  const map = {}, used = new Set(), H = headers.map(normH);
+  for(const [field, aliases] of Object.entries(FIELD_ALIASES)){
+    let idx = -1;
+    for(const a of aliases){ const i = H.findIndex((h, k) => !used.has(k) && h === normH(a)); if(i >= 0){ idx = i; break; } }
+    if(idx < 0) for(const a of aliases){ if(normH(a).length < 2) continue; const i = H.findIndex((h, k) => !used.has(k) && h.includes(normH(a))); if(i >= 0){ idx = i; break; } }
+    if(idx >= 0){ map[field] = idx; used.add(idx); }
+  }
+  return map;
+}
+
+/* ================= 実績取込の共通処理（CSV・貼付・手入力） ================= */
+const prepareLog = (raw, opt = {}) => prepareLogCore(raw, {...opt, taskLookup:id => taskById(id) || null});
+function markDups(rows, excludeId = ''){
+  const seen = new Set(S.logs.filter(l => l.id !== excludeId).map(fp));
+  rows.forEach(r => { if(r.errors.length) return; const k = fp(r.v); if(seen.has(k)) r.dup = true; else seen.add(k); });
+  return rows;
+}
+let PENDING = {rows:[], source:''};
+function openImportPreview(rows, source, title){
+  PENDING = {rows, source};
+  const ok = rows.filter(r => !r.errors.length && !r.dup);
+  const err = rows.filter(r => r.errors.length), dup = rows.filter(r => r.dup);
+  const unknown = ok.filter(r => r.unknown), sens = ok.filter(r => r.sens.length);
+  openSheet(title, `
+    <div class="grid2">
+      <div class="card kpi em"><div class="l">取込可能</div><div class="v">${ok.length}<small>件</small></div></div>
+      <div class="card kpi"><div class="l">除外</div><div class="v">${err.length + dup.length}<small>件</small></div><div class="s">エラー ${err.length}／重複 ${dup.length}</div></div>
+    </div>
+    ${err.length ? `<div class="alert"><b>入力エラーのため取り込みません（${err.length}件）</b><ul class="errl">${err.slice(0,15).map(r => `<li>${esc(r.rowLabel)}：${esc(r.errors.join('／'))}</li>`).join('')}${err.length > 15 ? `<li>…ほか${err.length-15}件</li>` : ''}</ul></div>` : ''}
+    ${dup.length ? `<div class="safe">重複（既に登録済み、または同じ取込内で同一）：${dup.slice(0,10).map(r => esc(r.rowLabel)).join('、')}${dup.length > 10 ? ' ほか' : ''}</div>` : ''}
+    ${unknown.length ? `<label class="chk"><input type="checkbox" id="imp-unknown"><div>未登録の案件ID（${unknown.length}件：${esc([...new Set(unknown.map(r => r.v.taskId))].slice(0,5).join('、'))}）を「未紐付」として取り込む<div class="note" style="margin:0">チェックしない場合は除外します</div></div></label>` : ''}
+    ${sens.length ? `<div class="alert"><b>機密情報を検出（${sens.length}件）</b><ul class="errl">${sens.slice(0,8).map(r => `<li>${esc(r.rowLabel)}：${esc([...new Set(r.sens.map(h => h.k))].join('、'))}</li>`).join('')}</ul></div>
+      <label class="chk"><input type="radio" name="imp-sens" value="exclude" checked><div>該当する行を除外する</div></label>
+      <label class="chk"><input type="radio" name="imp-sens" value="mask"><div>該当部分を伏字にして取り込む</div></label>` : ''}
+    ${source === 'paste' ? `<label class="chk"><input type="checkbox" id="imp-review" checked><div>承認済の関連案件を「確認待ち」に進める<div class="note" style="margin:0">完了の判定は「検証」画面で報告を確認してから行います</div></div></label>` : ''}
+    <label class="f">プレビュー（先頭3件）</label>
+    <div class="list" style="margin-top:0">${ok.slice(0,3).map(r => logCard({...r.v, id:'(新規)'})).join('') || '<div class="empty">取り込める行がありません</div>'}</div>
+    <div class="row2"><button class="btn ghost" data-act="close">やめる</button><button class="btn primary" data-act="import-commit" ${ok.length ? '' : 'disabled'}>取り込む</button></div>`);
+}
+
+/* ================= プロンプト・指示文 ================= */
+const clip = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, n) + '…（以下略）' : s; };
+function meetingHead(m){
+  const s = S.settings;
+  return `会議ID：${isTmp(m.id) ? '（同期後に付番）' : m.id}
+種別：${MTYPE[m.type].l}（${MTYPE[m.type].j}）
+組織：${s.company}
+議題：${m.topic}
+${m.context ? `背景・補足：\n${m.context}\n` : ''}`;
+}
+function buildOpinionPrompt(m, name){
+  const ai = aiByName(name) || {role:'', lens:''};
+  return `【Brain Meetings｜意見照会】
+${meetingHead(m)}
+あなたの役割：${ai.role || '参加者'}${ai.lens ? `（観点：${ai.lens}）` : ''}
+
+議長（${S.settings.chair}）が結論を出す前に、あなたの役割の観点から意見を述べてください。
+
+■ 出力
+1. 立場：賛成／条件付き賛成／反対／判断保留 のいずれかと、一言の理由
+2. 観点からの指摘（最大5点）
+3. 議長への提言（1〜3行）
+
+■ ルール
+・推測は「推測」と明記し、不明な事実は「要確認」と書くこと
+・個人情報・給与情報は扱わないこと
+・400字程度で簡潔に`;
+}
+function buildPrompt(m){
+  const s = S.settings;
+  const ops = m.participants.filter(n => m.opinions[n] && m.opinions[n].text);
+  const missing = m.participants.filter(n => !(m.opinions[n] && m.opinions[n].text));
+  const body = {
+    quick:`即決会議として、短時間で結論を出してください。
+1. 論点の整理（1〜3行）
+2. 選択肢（最大3案：効果・リスク・コスト）
+3. 推奨案とその理由
+4. 最終決裁者（人間）が確認すべき点`,
+    board:`経営戦略会議として、次の構成で検討してください。
+1. 現状認識（事実と仮説を分けて）
+2. 強み・弱み／機会・脅威
+3. 戦略オプション3案の比較（効果・投資・リスク・実現性）
+4. 推奨戦略と判断理由
+5. 30日・90日のマイルストーンとKPI
+6. 撤退・見直しの基準
+7. 最終決裁者（人間）が判断すべき論点`,
+    project:`プロジェクト実行会議として、実行計画を作成してください。
+1. ゴールと完了条件
+2. 作業分解（WBS）と順序・依存関係
+3. 役割分担（${s.chair}＝議長・設計、${(execAI() || {name:'Grok Bot'}).name}＝現場実行、人間＝承認）
+4. マイルストーンと期限
+5. リスクと対策
+6. 最初の1週間に着手するタスク`
+  }[m.type];
+  return `【Brain Meetings｜${MTYPE[m.type].l}：${MTYPE[m.type].j}】
+あなたはAI経営会議の議長です。
+${meetingHead(m)}${ops.length ? `
+■ 参加AIの意見（${ops.length}名）
+${ops.map(n => { const a = aiByName(n) || {}; return `【${n}｜${a.role || '参加者'}】\n${clip(m.opinions[n].text, 3000)}`; }).join('\n\n')}
+${missing.length ? `（未回答：${missing.join('、')}）\n` : ''}
+各意見の採用・不採用とその理由を明示したうえで、` : ''}
+${body}
+
+■ 出力ルール
+・不明な事実は推測で埋めず「要確認」と書くこと
+・個人情報・給与情報は扱わないこと
+・最後に実行指示を1行1件、次の形式で列挙すること（管理アプリが読み取ります）
+[指示] 担当：${(execAI() || {name:'Grok Bot'}).name} ／ 内容：〇〇 ／ 期限：YYYY-MM-DD ／ 優先度：高`;
+}
+function buildMinutesPrompt(m){
+  const tasks = S.tasks.filter(t => t.meetingId === m.id);
+  return `【Brain Meetings｜議事録作成】
+${meetingHead(m)}
+参加：議長 ${S.settings.chair}${m.participants.length ? '、' + m.participants.join('、') : ''}、決裁 人間
+${m.participants.filter(n => m.opinions[n] && m.opinions[n].text).map(n => `■ ${n}の意見\n${clip(m.opinions[n].text, 2000)}`).join('\n\n')}
+
+■ 議長の結論
+${clip(m.result, 6000) || '（未記入）'}
+${m.conclusion ? `\n■ 結論メモ\n${m.conclusion}\n` : ''}${tasks.length ? `\n■ 登録した指示\n${tasks.map(t => `・${dispId(t.id)} ${t.title}（担当 ${t.assignee}／期限 ${t.due || '未設定'}／${APPROVAL[t.approval]}）`).join('\n')}\n` : ''}
+次の形式で議事録を作成してください。
+1. 決定事項
+2. 主な論点と各AIの立場
+3. 宿題（担当・期限）
+4. 今後の展開予測とリスク
+5. 次回会議で確認すること`;
+}
+function parseDirectives(text){
+  const out = [];
+  String(text || '').split(/\r?\n/).forEach(line => {
+    const l = line.replace(/\*\*/g,'').trim();
+    if(!/^[-*・•\s\d.]*[\[［【]指示[\]］】]/.test(l)) return;
+    const body = l.replace(/^[-*・•\s\d.]*[\[［【]指示[\]］】]\s*/, '');
+    const o = {rawAssignee:'', assignee:'', title:'', due:'', rawDue:'', priority:'mid'};
+    body.split(/\s*[／|｜]\s*/).forEach(part => {
+      const m = part.match(/^(.+?)[：:]\s*(.*)$/);
+      if(!m){ if(!o.title) o.title = part.trim(); return; }
+      const k = m[1].trim(), v = m[2].trim();
+      if(/担当/.test(k)){ o.rawAssignee = v; o.assignee = normAssignee(v); }
+      else if(/内容|件名|タスク|作業/.test(k)) o.title = v;
+      else if(/期限|納期|締切/.test(k)){ o.rawDue = v; o.due = findDate(v) || ''; }
+      else if(/優先/.test(k)) o.priority = /高/.test(v) ? 'high' : /低/.test(v) ? 'low' : 'mid';
+    });
+    if(!o.rawAssignee) o.assignee = (execAI() || {name:''}).name;
+    if(o.title) out.push(o);
+  });
+  return out;
+}
+function aiPreamble(name){
+  if(/grok/i.test(name)) return 'Grok Botへの業務指示です。実施していない作業・測っていない数値は書かず、作業後に末尾の完了報告フォーマットで返信してください。';
+  if(/人間|nozu/i.test(name)) return '担当者（人間）への作業メモです。';
+  return `${name}への業務依頼です。内容を確認のうえ対応し、末尾の完了報告フォーマットで返信してください。`;
+}
+function reportFormat(t){
+  return `■ 完了報告（この形式で返信してください）
+案件ID：${t.id}
+実施日時：YYYY-MM-DD HH:MM
+担当区分：${t.assignee}
+作業内容：
+処理件数：（数字のみ。測っていなければ空欄）
+削減時間（分）：（数字のみ。測っていなければ空欄）
+改善成果：
+課題・確認事項：`;
+}
+function buildInstruction(t){
+  return `${aiPreamble(t.assignee)}
+
+【業務指示｜${t.id}】
+発行：Re:zenythe BM Control
+関連会議：${t.meetingId ? dispId(t.meetingId) : 'なし'}
+担当：${t.assignee}
+優先度：${PRI[t.priority]}　期限：${t.due || '未設定'}
+
+■ 依頼内容
+${t.title}
+${t.detail ? `\n■ 詳細・完了条件\n${t.detail}\n` : ''}
+■ 注意
+・個人情報・給与情報・APIキーは扱わないでください
+・実施していない作業を完了と報告しないでください。不明点は「要確認」と書いてください
+
+${reportFormat(t)}`;
+}
+const previewInstruction = t => `【確認用プレビュー｜${isTmp(t.id) ? '付番待ち' : APPROVAL[t.approval]}・送付不可】\n\n` + buildInstruction(t);
+function buildVerifyPrompt(t, verifier){
+  const r = taskReports(t);
+  const a = aiByName(verifier) || {role:''};
+  const who = verifier === S.settings.chair ? 'BM議長' : `BMの検証役（${a.role || '検証'}）`;
+  return `【BM検証依頼｜${t.id}】
+あなたは${who}です。次の業務指示と、担当AIからの完了報告を照合して検証してください。
+
+■ 業務指示
+件名：${t.title}
+担当：${t.assignee}　期限：${t.due || '未設定'}　承認：${APPROVAL[t.approval]}
+${t.detail ? `詳細・完了条件：\n${t.detail}\n` : ''}
+■ 完了報告（${r.length}件）
+${r.map(l => `[${l.id}｜${VERIFY[l.verify]}]
+実施日時：${fmtDT(l.datetime)}
+担当区分：${l.category || '—'}
+作業内容：${l.content}
+処理件数：${l.count ?? '未測定'}
+削減時間：${l.savedMin == null ? '未測定' : l.savedMin + '分'}
+改善成果：${l.outcome || '—'}
+課題・確認事項：${l.issue || '—'}${l.verifyNote ? `\n差し戻し理由：${l.verifyNote}` : ''}`).join('\n\n')}
+
+■ 検証観点
+1. 指示内容と報告内容が対応しているか
+2. 完了条件を満たしているか
+3. 処理件数・削減時間に根拠があるか（未測定の項目は何か）
+4. 追加確認や差し戻しが必要な点
+
+■ 出力
+判定：「確認済でよい」「差し戻し」「要確認」のいずれか
+理由：3行以内
+差し戻しの場合：担当AIへの再指示文（1〜3行）`;
+}
+function buildReturnMessage(t, l){
+  return `${aiPreamble(t.assignee)}
+
+【差し戻し｜${t.id}】
+次の報告を確認しましたが、再対応をお願いします。
+対象報告：${l.id}（実施日時 ${fmtDT(l.datetime)}）
+作業内容：${l.content}
+差し戻し理由：${l.verifyNote || '（記載なし）'}
+
+対応後、次の形式で再報告してください。
+
+${reportFormat(t)}`;
+}
+
+/* ================= 描画 ================= */
+let view = 'home', homeFilter = 'review', period = 'trial', mtype = 'quick', apFilter = 'all', logFilter = 'all', vFilter = 'pending', editingTask = null;
+let NEW_MEMBERS = null, SET_MEMBERS = null;
+
+function inPeriod(s){
+  if(period === 'all') return true;
+  const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return false;
+  const st = S.settings.startDate, d = `${m[1]}-${m[2]}-${m[3]}`;
+  const e = new Date(st + 'T00:00'); e.setDate(e.getDate() + 30);
+  return d >= st && d < ymd(e);
+}
+const isOverdue = t => t.due && t.status !== 'done' && t.due < today();
+function sortTasks(a, b){ return (PRI_ORDER[a.priority] - PRI_ORDER[b.priority]) || ((a.due || '9999') < (b.due || '9999') ? -1 : (a.due || '9999') > (b.due || '9999') ? 1 : 0) || idSort(b, a); }
+function taskCard(t){
+  const ap = t.approval === 'approved' ? 'em' : t.approval === 'rejected' ? 'danger' : 'warn';
+  const rs = reportState(t), ls = lastSend(t);
+  return `<button type="button" class="item" data-act="task-open" data-id="${esc(t.id)}">
+    <div class="meta"><span class="pri ${t.priority}"></span>${idTag(t.id)}<span class="bd">${esc(t.assignee)}</span><span class="bd ${ap}">${APPROVAL[t.approval]}</span>${t.meetingId ? `<span class="bd violet">${esc(dispId(t.meetingId))}</span>` : ''}</div>
+    <div class="t">${esc(t.title)}</div>
+    <div class="meta"><span class="st-${t.status}">● ${STATUS_L[t.status]}${t.doneBasis === 'legacy' ? '（旧版）' : t.doneBasis === 'override' ? '（例外）' : ''}</span><span class="${isOverdue(t) ? 'overdue' : ''}">期限 ${t.due || '未設定'}${isOverdue(t) ? '（超過）' : ''}</span><span class="bd ${RS_CLS[rs]}">${REPORT_STATE[rs]}</span>${ls ? `<span>送付 ${fmtShort(ls.at)}</span>` : ''}</div>
+  </button>`;
+}
+function renderHeader(){
+  const st = new Date(S.settings.startDate + 'T00:00'); const n = Math.floor((new Date().setHours(0,0,0,0) - st) / 86400000) + 1;
+  $('#day-badge').textContent = n < 1 ? `START -${1-n}d` : n > 30 ? 'DAY 30+ 終了' : `DAY ${pad(n)}/30`;
+  $('.gear').classList.toggle('on', view === 'set');
+  if(CONN.mode !== 'sheet') setSyncState('local');
+  else if(!SYNCING) setSyncState(CONN.lastError ? 'error' : pendingChanges() ? 'pending' : 'ok');
+}
+function pendingReportCount(){ return S.logs.filter(l => l.verify === 'unverified' && taskById(l.taskId)).length + S.logs.filter(l => !l.taskId || !taskById(l.taskId)).length; }
+function heroMeeting(){
+  const ms = [...S.meetings].sort(idSort).reverse();
+  return ms.find(m => m.status !== 'decided') || ms[0] || null;
+}
+function heroNodes(m){
+  const s = S.settings, nodes = [];
+  nodes.push({name:s.chair, sub:m.result ? '結論済' : '議長', cls:'chair'});
+  m.participants.forEach(n => { const o = m.opinions[n] || {}; const a = aiByName(n) || {}; nodes.push({name:n, sub:o.text ? '意見あり ✓' : o.sentAt ? '照会中' : (a.role || '参加'), cls:o.text ? 'got' : o.sentAt ? 'sent' : ''}); });
+  if(s.scribe && (m.type !== 'quick' || m.minutes)) nodes.push({name:s.scribe, sub:m.minutes ? '記録済' : '議事録', cls:'scribe'});
+  const ex = execAI();
+  if(ex){ const n = S.tasks.filter(t => t.assignee === ex.name && t.status === 'doing').length; nodes.push({name:ex.name, sub:n ? `実行中 ${n}件` : '現場実行', cls:'exec'}); }
+  return nodes.slice(0, 8);
+}
+function renderHero(){
+  const m = heroMeeting();
+  if(!m){
+    $('#hero').innerHTML = `<div class="hero" style="cursor:default;padding:22px 16px"><div style="font-family:var(--mono);color:var(--em);font-size:13px;letter-spacing:.2em">BRAIN NETWORK</div><div class="tp" style="padding:0;margin-top:6px">議題を入力して、AI頭脳会議を始めましょう</div><p class="note">議長と意見役のAIが席につき、結論から実行指示までをこの画面で管理します。</p><div class="stack"><button class="btn primary" data-act="go" data-v="meet">最初の会議を起動</button></div></div>`;
+    return;
+  }
+  const nodes = heroNodes(m), n = nodes.length;
+  const pts = nodes.map((_, i) => { const a = -Math.PI/2 + i * 2 * Math.PI / n; return {x:Math.max(56, Math.min(294, 175 + 128 * Math.cos(a))), y:Math.max(24, Math.min(216, 120 + 98 * Math.sin(a)))}; });
+  const lines = pts.map((p, i) => `<line x1="175" y1="120" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" ${nodes[i].cls === 'exec' ? 'stroke="#6CCFF6" stroke-width="2" stroke-dasharray="4 4"' : `stroke="#2EE6A6" stroke-opacity="${nodes[i].cls === 'got' || nodes[i].cls === 'chair' ? .7 : .3}" stroke-width="1.2"`} vector-effect="non-scaling-stroke"/>`).join('');
+  $('#hero').innerHTML = `<div class="hero" data-act="meet-open" data-id="${esc(m.id)}" role="button" tabindex="0" aria-label="会議 ${esc(dispId(m.id))} を開く">
+    <div class="hd">${m.status === 'decided' ? '直近の会議' : '進行中の会議'} ${idTag(m.id)} ・ ${MTYPE[m.type].l}</div>
+    <div class="tp">${esc(m.topic)}</div>
+    <div class="net">
+      <svg class="lines" viewBox="0 0 350 240" preserveAspectRatio="none" aria-hidden="true">${lines}<circle cx="175" cy="120" r="62" fill="none" stroke="#2EE6A6" stroke-opacity=".12" vector-effect="non-scaling-stroke"/></svg>
+      <div class="core"><b>BM</b><span>${MSTAT[m.status]}</span><small>${esc(dispId(m.id))}</small></div>
+      ${nodes.map((nd, i) => `<div class="node ${nd.cls}" style="left:calc(${(pts[i].x / 350 * 100).toFixed(2)}% - 54px);top:${(pts[i].y - 24).toFixed(0)}px"><b>${esc(nd.name)}</b><small>${esc(nd.sub)}</small></div>`).join('')}
+    </div>
+  </div>`;
+}
+function renderHome(){
+  const alerts = [];
+  const hasData = S.tasks.length + S.logs.length > 0;
+  const le = S.meta.lastExport ? Math.floor((Date.now() - new Date(S.meta.lastExport)) / 86400000) : null;
+  if(CONN.mode === 'sheet' && CONN.lastError) alerts.push(`<div class="alert" style="margin:0 0 12px">同期できていません：${esc(CONN.lastError)}<button class="btn sm" style="margin-top:8px" data-act="sync-now">再試行</button></div>`);
+  if(CONN.mode !== 'sheet' && hasData && (le === null || le >= 7)) alerts.push(`<div class="safe" style="margin:0 0 12px">${le === null ? 'まだバックアップがありません' : `最終バックアップから${le}日`}。スプレッドシート連携か、JSON書き出しをおすすめします。<button class="btn sm" style="margin-top:8px" data-act="json-export">JSON書き出し</button></div>`);
+  const au = auditAll();
+  if(au.length) alerts.push(`<div class="alert" style="margin:0 0 12px">保存済みデータに機密情報らしき記載が${au.length}件あります。<button class="btn sm danger" style="margin-top:8px" data-act="audit-open">安全点検を開く</button></div>`);
+  $('#home-alerts').innerHTML = alerts.join('');
+  renderHero();
+
+  const counts = Object.fromEntries(STATUS.map(([k]) => [k, S.tasks.filter(t => t.status === k).length]));
+  const short = {todo:'未着手', doing:'実行中', review:'確認待ち', done:'完了', hold:'要判断'};
+  $('#flow').innerHTML = STATUS.map(([k]) => {
+    const cls = [k === 'doing' ? 'doing' : '', k === 'review' && counts[k] ? 'hot' : '', k === 'hold' && counts[k] ? 'warn' : '', homeFilter === k ? 'on' : ''].join(' ');
+    return `<button type="button" class="fstep ${cls}" data-act="home-filter" data-f="${k}" aria-pressed="${homeFilter === k}"><div class="c">${counts[k]}</div>${short[k]}</button>`;
+  }).join('');
+  $('#list-title').textContent = `案件：${STATUS_L[homeFilter]}`;
+  const list = S.tasks.filter(t => t.status === homeFilter).sort(sortTasks);
+  $('#home-list').innerHTML = list.length ? list.map(taskCard).join('') : `<div class="empty">「${STATUS_L[homeFilter]}」の案件はありません</div>`;
+
+  $$('#period-seg button').forEach(b => b.classList.toggle('on', b.dataset.p === period));
+  const T = S.tasks.filter(t => inPeriod(t.createdAt));
+  const L = S.logs.filter(l => inPeriod(l.datetime));
+  const done = T.filter(t => t.status === 'done'), doneV = done.filter(t => t.doneBasis === 'verified').length;
+  const open = T.filter(t => t.status !== 'done').length;
+  const measured = L.filter(l => l.savedMin != null), unmeasured = L.length - measured.length;
+  const saved = measured.reduce((a, l) => a + Number(l.savedMin), 0);
+  const cntM = L.filter(l => l.count != null), cnt = cntM.reduce((a, l) => a + Number(l.count), 0);
+  const overdue = T.filter(isOverdue).length;
+  const unv = L.filter(l => l.verify === 'unverified').length;
+  const kpi = (l, v, s = '', cls = '') => `<div class="card kpi ${cls}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+  $('#kpis').innerHTML =
+    kpi('作業削減時間', measured.length ? fmtMinHTML(saved) : '<span class="unm">未測定</span>', `測定 ${measured.length}件／未測定 ${unmeasured}件`, 'em') +
+    kpi('完了率', T.length ? `${Math.round(done.length / T.length * 100)}<small>%</small>` : '—', `完了 ${done.length}件・報告確認済 ${doneV}件`) +
+    kpi('業務件数（案件）', `${T.length}<small>件</small>`, `実績記録 ${L.length}件`) +
+    kpi('未完了案件', `${open}<small>件</small>`, overdue ? `<span class="overdue">期限超過 ${overdue}件</span>` : '期限超過なし') +
+    kpi('処理件数', cntM.length ? `${cnt}<small>件</small>` : '<span class="unm">未測定</span>', `測定 ${cntM.length}件／未測定 ${L.length - cntM.length}件`) +
+    kpi('要検証の報告', `${unv}<small>件</small>`, `未承認案件 ${T.filter(t => t.approval === 'pending').length}件`);
+
+  const names = [...new Set([...aiNames(), ...T.map(t => t.assignee)])].filter(n => T.some(t => t.assignee === n));
+  $('#by-assignee').innerHTML = names.length ? `<table class="tb"><tr><th>担当</th><th>案件</th><th>完了</th><th>進行</th><th>保留</th></tr>${names.map(n => {
+    const a = T.filter(t => t.assignee === n), d = a.filter(t => t.status === 'done').length;
+    return `<tr><td>${esc(n)}<div class="bar"><i style="width:${a.length ? d / a.length * 100 : 0}%"></i></div></td><td>${a.length}</td><td>${d}</td><td>${a.filter(t => t.status === 'doing' || t.status === 'review').length}</td><td>${a.filter(t => t.status === 'hold').length}</td></tr>`;
+  }).join('')}</table>` : '<div class="empty">期間内の案件はありません</div>';
+  const cats = [...new Set(L.map(l => l.category || '（区分なし）'))];
+  const un = '<span style="color:var(--dim)">未測定</span>';
+  $('#by-category').innerHTML = cats.length ? `<table class="tb"><tr><th>担当区分</th><th>記録</th><th>処理件数</th><th>削減時間</th></tr>${cats.map(c => {
+    const a = L.filter(l => (l.category || '（区分なし）') === c);
+    const sm = a.filter(l => l.savedMin != null), cm = a.filter(l => l.count != null);
+    return `<tr><td>${esc(c)}</td><td>${a.length}</td><td>${cm.length ? cm.reduce((x, l) => x + Number(l.count), 0) : un}</td><td>${sm.length ? fmtMin(sm.reduce((x, l) => x + Number(l.savedMin), 0)) : un}</td></tr>`;
+  }).join('')}</table>` : '<div class="empty">期間内の実績はありません</div>';
+}
+function renderMeet(){
+  $$('#mtype-seg button').forEach(b => b.classList.toggle('on', b.dataset.t === mtype));
+  if(!NEW_MEMBERS) NEW_MEMBERS = [...(S.settings.members[mtype] || [])];
+  const cands = memberCandidates();
+  NEW_MEMBERS = NEW_MEMBERS.filter(n => cands.includes(n));
+  $('#m-chair').textContent = S.settings.chair;
+  $('#m-members').innerHTML = cands.length ? cands.map(n => `<button type="button" class="chip ${NEW_MEMBERS.includes(n) ? 'on' : ''}" data-act="m-member" data-ai="${esc(n)}" aria-pressed="${NEW_MEMBERS.includes(n)}">${esc(n)}<span style="font-weight:500;margin-left:6px;font-size:13px">${esc((aiByName(n) || {}).role || '')}</span></button>`).join('') : '<span class="note" style="margin:0">意見役のAIが設定されていません（設定で追加できます）</span>';
+  const ms = [...S.meetings].sort(idSort).reverse();
+  $('#meet-list').innerHTML = ms.length ? ms.map(m => {
+    const n = S.tasks.filter(t => t.meetingId === m.id).length;
+    const got = m.participants.filter(p => m.opinions[p] && m.opinions[p].text).length;
+    const c = m.status === 'decided' ? 'em' : m.status === 'held' ? 'info' : 'warn';
+    return `<button type="button" class="item" data-act="meet-open" data-id="${esc(m.id)}">
+      <div class="meta">${idTag(m.id)}<span class="bd violet">${MTYPE[m.type].l}</span><span class="bd ${c}">${MSTAT[m.status]}</span></div>
+      <div class="t">${esc(m.topic)}</div>
+      <div class="meta"><span>${fmtDT(m.createdAt)}</span>${m.participants.length ? `<span>意見 ${got}/${m.participants.length}</span>` : ''}<span>関連指示 ${n}件</span></div></button>`;
+  }).join('') : '<div class="empty">まだ会議はありません。議題を入れて起動してください。</div>';
+}
+function aiOptions(sel, withBlank = false, blankLabel = '— 選択 —'){
+  return (withBlank ? `<option value="" ${sel ? '' : 'selected'}>${blankLabel}</option>` : '') + aiNames().map(n => `<option ${n === sel ? 'selected' : ''}>${esc(n)}</option>`).join('');
+}
+function fillTaskSelects(){
+  const a = $('#tf-assignee'), cur = a.value;
+  a.innerHTML = aiOptions('');
+  a.value = cur && aiNames().includes(cur) ? cur : ((execAI() || {}).name || aiNames()[0]);
+  const m = $('#tf-meeting'), mc = m.value;
+  m.innerHTML = '<option value="">なし</option>' + [...S.meetings].sort(idSort).reverse().map(x => `<option value="${esc(x.id)}">${esc(dispId(x.id))}｜${esc(x.topic.slice(0,18))}</option>`).join('');
+  m.value = mc && meetById(mc) ? rid(mc) : '';
+}
+function renderTasks(){
+  fillTaskSelects();
+  const ap = {all:'すべて', pending:'未承認', approved:'承認済', rejected:'却下'};
+  $('#ap-chips').innerHTML = Object.entries(ap).map(([k, l]) => `<button type="button" class="chip ${apFilter === k ? 'on' : ''}" data-act="ap-filter" data-f="${k}">${l}<b>${k === 'all' ? S.tasks.length : S.tasks.filter(t => t.approval === k).length}</b></button>`).join('');
+  const q = $('#task-q').value.trim().toLowerCase();
+  const list = S.tasks.filter(t => (apFilter === 'all' || t.approval === apFilter) && (!q || `${t.id} ${t.title} ${t.assignee} ${t.meetingId}`.toLowerCase().includes(q))).sort(idSort).reverse();
+  $('#task-list').innerHTML = list.length ? list.map(taskCard).join('') : '<div class="empty">該当する指示はありません</div>';
+}
+
+/* ---------- 検証（照合）画面 ---------- */
+function reportFlags(l, t){
+  const f = [];
+  if(t.approval !== 'approved') f.push(['warn', '未承認案件への報告']);
+  if(!t.sends.length) f.push(['warn', 'アプリから未送付の案件']);
+  const fs = t.sends[0];
+  if(fs && l.datetime && l.datetime < localDT(new Date(fs.at))) f.push(['danger', '送付より前の日時']);
+  else if(!fs && t.createdAt && l.datetime && l.datetime < t.createdAt.slice(0,16)) f.push(['danger', '案件作成より前の日時']);
+  if(t.due && l.datetime && l.datetime.slice(0,10) > t.due) f.push(['warn', '期限後の報告']);
+  if(l.category && l.category !== t.assignee) f.push(['warn', `担当区分「${l.category}」が担当と不一致`]);
+  if(l.count == null || l.savedMin == null) f.push(['', `未測定：${[l.count == null ? '処理件数' : '', l.savedMin == null ? '削減時間' : ''].filter(Boolean).join('・')}`]);
+  if(S.logs.some(x => x.id !== l.id && x.taskId === l.taskId && contentKey(x) === contentKey(l))) f.push(['warn', '同じ内容の報告が他にもあります']);
+  if(l.issue) f.push(['info', '課題・確認事項あり']);
+  if(scanText([l.content, l.outcome, l.issue].join('\n')).length) f.push(['danger', '機密情報らしき記載']);
+  return f;
+}
+function reportBlock(l, t){
+  const flags = reportFlags(l, t);
+  return `<div class="rep ${l.verify}">
+    <div class="meta">${idTag(l.id)}<span class="bd ${l.verify === 'verified' ? 'em' : l.verify === 'rejected' ? 'danger' : 'warn'}">${VERIFY[l.verify]}</span><span>${fmtDT(l.datetime)}</span><span class="bd info">${SOURCE[l.source] || ''}</span></div>
+    <div class="c">${esc(l.content)}</div>
+    <div class="kv"><span>処理件数</span><b>${l.count == null ? '未測定' : l.count + '件'}</b><span>削減時間</span><b>${fmtMin(l.savedMin)}</b>${l.outcome ? `<span>改善成果</span><b>${esc(l.outcome)}</b>` : ''}${l.issue ? `<span>課題</span><b>${esc(l.issue)}</b>` : ''}${l.verifyNote ? `<span>差し戻し理由</span><b>${esc(l.verifyNote)}</b>` : ''}</div>
+    ${flags.length ? `<div class="meta" style="margin-top:8px">${flags.map(([c, x]) => `<span class="bd ${c}">${esc(x)}</span>`).join('')}</div>` : ''}
+    <div class="row3">
+      <button class="btn sm ${l.verify === 'verified' ? '' : 'primary'}" data-act="rep-verify" data-id="${esc(l.id)}" ${l.verify === 'verified' ? 'disabled' : ''}>確認済</button>
+      <button class="btn sm danger" data-act="rep-reject" data-id="${esc(l.id)}" ${l.verify === 'rejected' ? 'disabled' : ''}>差し戻し</button>
+      <button class="btn sm ghost" data-act="rep-reset" data-id="${esc(l.id)}" ${l.verify === 'unverified' ? 'disabled' : ''}>未確認へ</button>
+    </div>
+    ${l.verify === 'rejected' ? `<div class="stack"><button class="btn sm" data-act="return-send" data-id="${esc(l.id)}" ${canSend(t) ? '' : 'disabled'}>差し戻し文をコピー → ${esc(t.assignee)}</button></div>` : ''}
+  </div>`;
+}
+function verifyTaskCard(t){
+  const r = taskReports(t).sort((a, b) => a.datetime < b.datetime ? 1 : -1);
+  const rs = reportState(t), vf = S.settings.verifier, va = aiByName(vf);
+  const doneOk = t.approval === 'approved' && rs === 'verified' && t.status !== 'done';
+  return `<div class="card vt">
+    <div class="meta"><span class="pri ${t.priority}"></span>${idTag(t.id)}<span class="bd">${esc(t.assignee)}</span><span class="bd ${t.approval === 'approved' ? 'em' : 'warn'}">${APPROVAL[t.approval]}</span><span class="st-${t.status}">● ${STATUS_L[t.status]}</span><span class="bd ${RS_CLS[rs]}">${REPORT_STATE[rs]}</span></div>
+    <button type="button" class="t" data-act="task-open" data-id="${esc(t.id)}" style="all:unset;display:block;cursor:pointer;font-weight:700;font-size:17px;margin:6px 0">${esc(t.title)}</button>
+    <details class="dt"><summary>指示内容（期限 ${t.due || '未設定'}・送付 ${t.sends.length}回）</summary>
+      <div class="kv"><span>関連会議</span><b>${esc(t.meetingId ? dispId(t.meetingId) : 'なし')}</b><span>期限</span><b>${t.due || '未設定'}</b><span>初回送付</span><b>${t.sends[0] ? fmtDT(localDT(new Date(t.sends[0].at))) : '未送付'}</b></div>
+      ${t.detail ? `<pre class="pv">${esc(t.detail)}</pre>` : '<p class="note">詳細・完了条件の記載なし</p>'}
+    </details>
+    ${r.map(l => reportBlock(l, t)).join('')}
+    <div class="row2">
+      <button class="btn sm" data-act="verifier-send" data-id="${esc(t.id)}">${esc(vf)}に検証依頼<small>コピー → ${va && va.url ? 'アプリを開く' : 'コピーのみ'}</small></button>
+      <button class="btn sm ${doneOk ? 'primary' : ''}" data-act="task-status" data-id="${esc(t.id)}" data-s="done" ${t.status === 'done' ? 'disabled' : ''}>完了にする<small>${doneOk ? '確認済の報告あり' : t.status === 'done' ? '完了済' : '確認済の報告が必要'}</small></button>
+    </div>
+  </div>`;
+}
+function renderVerify(){
+  const withR = S.tasks.filter(t => taskReports(t).length);
+  const unmatched = S.logs.filter(l => !l.taskId || !taskById(l.taskId));
+  const groups = {
+    pending: withR.filter(t => taskReports(t).some(l => l.verify === 'unverified')),
+    returned: withR.filter(t => reportState(t) === 'returned'),
+    verified: withR.filter(t => reportState(t) === 'verified' && t.status !== 'done' && !taskReports(t).some(l => l.verify === 'unverified')),
+    done: withR.filter(t => t.status === 'done')
+  };
+  const labels = {pending:'要検証', returned:'差し戻し中', verified:'確認済・未完了', done:'完了済', unmatched:'照合不可'};
+  const cnt = k => k === 'unmatched' ? unmatched.length : groups[k].length;
+  $('#vf-chips').innerHTML = Object.keys(labels).map(k => `<button type="button" class="chip ${vFilter === k ? 'on' : ''}" data-act="v-filter" data-f="${k}">${labels[k]}<b>${cnt(k)}</b></button>`).join('');
+  if(vFilter === 'unmatched'){
+    const opts = [...S.tasks].filter(t => !isTmp(t.id)).sort(idSort).reverse().map(t => `<option value="${esc(t.id)}">${esc(t.id)}｜${esc(t.title.slice(0,20))}</option>`).join('');
+    $('#verify-list').innerHTML = unmatched.length ? `<p class="note">案件IDが空欄、または登録されていない報告です。正しい案件に紐付けると照合できます。</p>` + unmatched.map(l => `<div class="rep">
+      <div class="meta">${idTag(l.id)}${l.taskId ? `<span class="bd danger">未登録ID ${esc(l.taskId)}</span>` : '<span class="bd warn">案件ID なし</span>'}<span>${fmtDT(l.datetime)}</span><span class="bd">${esc(l.category || '区分なし')}</span></div>
+      <div class="c">${esc(l.content)}</div>
+      <div class="grid2" style="margin-top:6px"><select class="in sm" id="lk-${esc(l.id)}" aria-label="紐付ける案件"><option value="">— 案件を選択 —</option>${opts}</select><button class="btn sm primary" data-act="rep-link" data-id="${esc(l.id)}">紐付ける</button></div>
+    </div>`).join('') : '<div class="empty">照合できない報告はありません</div>';
+    return;
+  }
+  const list = groups[vFilter].sort(idSort).reverse();
+  $('#verify-list').innerHTML = list.length ? list.map(verifyTaskCard).join('') : `<div class="empty">「${labels[vFilter]}」の案件はありません</div>`;
+}
+function renderTabBadge(){
+  const n = pendingReportCount(), b = $('#verify-badge');
+  b.textContent = n > 99 ? '99+' : n; b.classList.toggle('hide', !n);
+}
+function logCard(l){
+  const linked = taskById(l.taskId);
+  return `<button type="button" class="item" data-act="log-open" data-id="${esc(l.id)}">
+    <div class="meta">${idTag(l.id)}${l.taskId ? `<span class="bd ${linked ? 'violet' : 'danger'}">${esc(dispId(l.taskId))}${linked ? '' : '（未登録）'}</span>` : '<span class="bd warn">案件未紐付</span>'}<span class="bd">${esc(l.category || '区分なし')}</span><span class="bd ${l.verify === 'verified' ? 'em' : l.verify === 'rejected' ? 'danger' : ''}">${VERIFY[l.verify] || '未確認'}</span><span class="bd info">${SOURCE[l.source] || '手入力'}</span></div>
+    <div class="t">${esc(l.content || '（作業内容なし）')}</div>
+    <div class="meta"><span>${fmtDT(l.datetime)}</span><span>件数 ${l.count == null ? '未測定' : l.count + '件'}</span><span class="${l.savedMin == null ? '' : 'st-done'}">削減 ${fmtMin(l.savedMin)}</span></div>
+    ${l.outcome ? `<div class="note" style="margin-top:6px">成果：${esc(l.outcome)}</div>` : ''}</button>`;
+}
+function renderLogs(){
+  const f = {all:['すべて', () => true], unverified:['未確認', l => l.verify === 'unverified'], unlinked:['案件未紐付', l => !l.taskId || !taskById(l.taskId)], unmeasured:['未測定あり', l => l.savedMin == null || l.count == null]};
+  $('#log-chips').innerHTML = Object.entries(f).map(([k, [lab, fn]]) => `<button type="button" class="chip ${logFilter === k ? 'on' : ''}" data-act="log-filter" data-f="${k}">${lab}<b>${S.logs.filter(fn).length}</b></button>`).join('');
+  const list = S.logs.filter(f[logFilter][1]).sort((a, b) => String(a.datetime) < String(b.datetime) ? 1 : -1);
+  $('#log-list').innerHTML = list.length ? list.slice(0, 300).map(logCard).join('') + (list.length > 300 ? `<p class="note">最新300件を表示中（全${list.length}件）</p>` : '') : '<div class="empty">実績はまだありません。報告の受信・貼付・CSV取込で追加されます。</div>';
+}
+
+/* ---------- 安全点検 ---------- */
+function auditAll(){
+  const items = [];
+  const add = (kind, id, obj, labels) => { const h = scanFields(obj, labels); if(h.length) items.push({kind, id, hits:h}); };
+  S.meetings.forEach(m => add('会議', dispId(m.id), {topic:m.topic, context:m.context, result:m.result, conclusion:m.conclusion, prompt:m.prompt, minutes:m.minutes, ...Object.fromEntries(Object.entries(m.opinions).map(([n, o]) => ['op:' + n, o.text]))}, {...FL, prompt:'会議プロンプト', ...Object.fromEntries(Object.keys(m.opinions).map(n => ['op:' + n, `${n}の意見`]))}));
+  S.tasks.forEach(t => add('案件', dispId(t.id), {title:t.title, detail:t.detail, instruction:t.instruction, reason:t.doneReason}, {...FL, instruction:'送付済み指示文'}));
+  S.logs.forEach(l => add('実績', dispId(l.id), {content:l.content, outcome:l.outcome, issue:l.issue, category:l.category, note:l.verifyNote}));
+  add('設定', '組織名', {company:S.settings.company});
+  S.history.forEach(h => { if(scanText(h.detail).length) items.push({kind:'履歴', id:`${String(h.at).slice(0,10)} ${h.action}`, hits:scanFields({detail:h.detail}, {detail:'履歴の詳細'})}); });
+  return items;
+}
+function maskAll(){
+  S.meetings.forEach(m => { ['topic','context','result','conclusion','prompt','minutes'].forEach(k => m[k] = maskText(m[k])); Object.values(m.opinions).forEach(o => { o.text = maskText(o.text); }); });
+  S.tasks.forEach(t => ['title','detail','instruction','doneReason'].forEach(k => t[k] = maskText(t[k])));
+  S.logs.forEach(l => ['content','outcome','issue','category','verifyNote'].forEach(k => l[k] = maskText(l[k])));
+  S.settings.company = maskText(S.settings.company);
+  S.history.forEach(h => { h.detail = maskText(h.detail); });
+}
+function renderAudit(){
+  const a = auditAll();
+  $('#audit-box').innerHTML = a.length
+    ? `<div class="alert" style="margin-top:0">保存済みデータに機密情報らしき記載が <b>${a.length}件</b> あります。</div><div class="stack"><button class="btn danger" data-act="audit-open">内容を確認して伏字にする</button></div>`
+    : `<div style="font-size:15px;color:var(--em)">✓ 保存データに機密情報らしき記載は見つかりませんでした</div><p class="note">点検対象：会議（意見・議事録を含む）・案件・送付済み指示文・実績・組織名・履歴</p>`;
+}
+function renderConn(){
+  const box = $('#conn-box'), a = document.activeElement;
+  if(box.innerHTML && a && box.contains(a) && /INPUT|TEXTAREA/.test(a.tagName)) return;
+  const on = CONN.mode === 'sheet';
+  const tokMask = CONN.token ? CONN.token.slice(0,4) + '••••••••' + CONN.token.slice(-4) : '';
+  $('#conn-box').innerHTML = on ? `
+    <div class="meta"><span class="dot ${SYNC_STATE === 'syncing' ? 'pending' : SYNC_STATE}"></span><b style="color:var(--text);font-size:16px">連携中</b><span>${esc(CONN.device)}</span></div>
+    <div class="kv" style="margin-top:8px"><span>最終同期</span><b>${CONN.lastSync ? fmtDT(localDT(new Date(CONN.lastSync))) : '—'}</b><span>未送信</span><b>${pendingChanges()}件</b><span>トークン</span><b>${esc(tokMask)}</b></div>
+    ${CONN.lastError ? `<div class="alert">${esc(CONN.lastError)}</div>` : ''}
+    <div class="row2"><button class="btn primary" data-act="sync-now">今すぐ同期</button><button class="btn ghost" data-act="conn-stop">連携を解除</button></div>
+    <p class="note">報告は、Grok Botの返信をLINEまたはメール（件名「BM報告」）で送ると、シートに自動で記録されます。</p>`
+  : `
+    <p style="margin:0;font-size:15px;color:var(--mute)">Googleスプレッドシートを本体にすると、複数の端末で同じデータを使え、LINE・メールで送った報告が自動で記録されます。準備手順はREADMEの「シート連携のセットアップ」を見てください。</p>
+    <label class="f">連携URL（GASのウェブアプリURL）</label>
+    <input class="in" id="c-url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(CONN.url)}">
+    <label class="f">連携トークン</label>
+    <input class="in" id="c-token" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="セットアップ時に表示されたトークン" value="${esc(CONN.token)}">
+    <label class="f">この端末の名前</label>
+    <input class="in" id="c-device" maxlength="20" value="${esc(CONN.device)}">
+    <div class="row2"><button class="btn" data-act="conn-test">接続テスト</button><button class="btn primary" data-act="conn-start">連携を開始</button></div>
+    <p class="note">トークンはこの端末の中だけに保存し、GitHubやJSONバックアップには含めません。</p>`;
+}
+function renderSet(){
+  renderConn();
+  $('#s-start').value = S.settings.startDate;
+  $('#s-company').value = S.settings.company;
+  $('#s-chair').innerHTML = aiOptions(S.settings.chair);
+  $('#s-verifier').innerHTML = aiOptions(S.settings.verifier);
+  $('#s-scribe').innerHTML = aiOptions(S.settings.scribe, true, 'なし');
+  $('#s-ais').value = S.settings.ais.map(a => [a.name, a.url, a.role, a.lens].join(' | ').replace(/( \| )+$/,'')).join('\n');
+  if(!SET_MEMBERS) SET_MEMBERS = JSON.parse(JSON.stringify(S.settings.members));
+  const cands = memberCandidates();
+  $('#s-members').innerHTML = ['quick','project','board'].map(k => `<div style="margin-top:8px"><div style="font-size:14px;color:var(--mute);margin-bottom:6px">${MTYPE[k].l}（${MTYPE[k].j}）</div><div class="chipset">${cands.map(n => `<button type="button" class="chip ${SET_MEMBERS[k].includes(n) ? 'on' : ''}" data-act="set-member" data-t="${k}" data-ai="${esc(n)}" aria-pressed="${SET_MEMBERS[k].includes(n)}">${esc(n)}</button>`).join('') || '<span class="note" style="margin:0">候補なし</span>'}</div></div>`).join('');
+  renderAudit();
+  renderSysInfo();
+}
+function renderSysInfo(){
+  let size = 0; try{ size = new Blob([lsGet(KEY) || '']).size; }catch(e){}
+  const oldKeys = PREV_KEYS.filter(k => !!lsGet(k));
+  const standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  $('#sys-info').innerHTML = `
+    <div class="kv"><span>版</span><b>Ver.${APP_VER}（データ形式 ${S.schema}${S.meta.migratedFrom ? `・Ver.${esc(S.meta.migratedFrom)}から移行` : ''}）</b>
+    <span>件数</span><b>会議 ${S.meetings.length}／案件 ${S.tasks.length}／実績 ${S.logs.length}／履歴 ${S.history.length}</b>
+    <span>容量</span><b>約${(size/1024).toFixed(1)}KB</b>
+    <span>保存先</span><b>${CONN.mode === 'sheet' ? 'スプレッドシート＋この端末' : 'この端末のみ'}</b>
+    <span>起動</span><b>${standalone ? 'ホーム画面アプリ' : 'ブラウザ'}</b>
+    <span>旧版データ</span><b>${oldKeys.length ? oldKeys.map(k => 'Ver.0.' + k.slice(-1)).join('・') + ' を端末内に保持（変更しません）' : 'なし'}</b>
+    <span>最終書き出し</span><b>${S.meta.lastExport ? fmtDT(localDT(new Date(S.meta.lastExport))) : 'なし'}</b></div>`;
+  $('#hist-list').innerHTML = S.history.length ? S.history.slice(0, 120).map(h => {
+    const d = new Date(h.at);
+    return `<div class="hist">${ymd(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}　<b>${esc(h.action)}</b>　<span class="id">${esc(h.target)}</span>${h.device ? `　<span>${esc(h.device)}</span>` : ''}${h.detail ? `<br>${esc(h.detail)}` : ''}</div>`;
+  }).join('') + (S.history.length > 120 ? `<p class="note">最新120件を表示（全${S.history.length}件）</p>` : '') : '<div class="empty">履歴はまだありません</div>';
+}
+function renderSetInfo(){ renderConn(); renderAudit(); renderSysInfo(); }
+function renderAll(){ renderHeader(); renderHome(); renderMeet(); renderTasks(); renderVerify(); renderLogs(); if(view === 'set') renderSetInfo(); renderTabBadge(); }
+function go(v){
+  view = v;
+  $$('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  $$('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if(v === 'set'){ SET_MEMBERS = null; renderSet(); }
+  renderHeader();
+  window.scrollTo({top:0});
+}
+
+/* ================= 詳細シート ================= */
+function openTask(id){
+  const t = taskById(id); if(!t) return;
+  const logs = taskReports(t), rs = reportState(t);
+  const sm = logs.filter(l => l.savedMin != null);
+  const ai = aiByName(t.assignee);
+  const sendable = canSend(t);
+  const lockMsg = isTmp(t.id) ? 'スプレッドシートと同期して案件IDが付くまで送付できません（電波のある場所で自動的に付番されます）。'
+    : t.approval === 'pending' ? '未承認のため送付できません。内容を確認して「承認済」にすると送付できます。'
+    : t.approval === 'rejected' ? '却下された指示は送付できません。'
+    : t.status === 'done' ? '完了済の案件です。' : t.status === 'hold' ? '保留・要判断中は送付できません。' : '';
+  const others = aiNames().filter(n => n !== t.assignee);
+  openSheet(dispId(t.id), `
+    <h3>${esc(t.title)}</h3>
+    <div class="meta"><span class="pri ${t.priority}"></span>優先度 ${PRI[t.priority]}<span class="bd">${esc(t.assignee)}</span>${t.meetingId ? `<span class="bd violet">${esc(dispId(t.meetingId))}</span>` : ''}<span class="${isOverdue(t) ? 'overdue' : ''}">期限 ${t.due || '未設定'}</span><span class="bd ${RS_CLS[rs]}">${REPORT_STATE[rs]}</span></div>
+    ${t.doneBasis === 'legacy' ? '<div class="lock">旧版で完了にした案件です。報告の確認記録はありません。</div>' : ''}
+    ${t.doneBasis === 'override' ? `<div class="lock">例外完了：${esc(t.doneReason)}</div>` : ''}
+    <label class="f">承認状態</label>
+    <div class="stbtns">${Object.entries(APPROVAL).map(([k, l]) => `<button class="${t.approval === k ? 'on' : ''}" data-act="task-approval" data-id="${esc(t.id)}" data-s="${k}" aria-pressed="${t.approval === k}">${l}</button>`).join('')}</div>
+    <label class="f">AIへ送付</label>
+    ${sendable ? `
+      <button class="btn cyan big" data-act="send-task" data-id="${esc(t.id)}">${esc(t.assignee)}へ送る<small>${ai && ai.url ? '指示文をコピー → アプリを開く' : '指示文をコピー（起動URLなし）'}</small></button>
+      <div class="row2"><button class="btn sm" data-act="copy-task" data-id="${esc(t.id)}">コピーのみ</button><button class="btn sm ghost" data-act="toggle-preview">指示文を表示</button></div>
+      <pre class="pv hide" id="inst-pv">${esc(buildInstruction(t))}</pre>
+      ${others.length ? `<label class="f">担当AIを切り替える</label><div class="chipset">${others.map(n => `<button type="button" class="chip" data-act="task-reassign" data-id="${esc(t.id)}" data-ai="${esc(n)}">${esc(n)}</button>`).join('')}</div>` : ''}
+      ${t.sends.length ? `<p class="note">送付記録：${t.sends.slice(-3).map(s => `${fmtShort(s.at)}→${esc(s.to)}`).join('、')}（計${t.sends.length}回）</p>` : ''}`
+    : `<div class="lock">${lockMsg}</div>
+      <label class="f">確認用プレビュー（コピー不可）</label>
+      <pre class="pv locked">${esc(previewInstruction(t))}</pre>
+      ${t.approval === 'pending' ? `<button class="btn primary" data-act="task-approval" data-id="${esc(t.id)}" data-s="approved">内容を確認して承認する</button>` : ''}`}
+    <label class="f">進捗ステータス</label>
+    <div class="stbtns">${STATUS.map(([k, l]) => `<button class="${t.status === k ? 'on' : ''}" data-act="task-status" data-id="${esc(t.id)}" data-s="${k}" aria-pressed="${t.status === k}">${l}</button>`).join('')}</div>
+    <p class="note" style="margin-top:6px">実行中・確認待ち・完了は承認済のみ。完了は確認済の報告が必要です。</p>
+    <label class="f">報告・実績（${logs.length}件・削減 ${sm.length ? fmtMin(sm.reduce((a, l) => a + Number(l.savedMin), 0)) : '未測定'}）</label>
+    <div class="list" style="margin-top:0">${logs.length ? logs.map(logCard).join('') : '<div class="empty">この案件の報告は未入力（未測定）です</div>'}</div>
+    <div class="row2"><button class="btn" data-act="log-paste" data-task="${esc(t.id)}">報告を貼付取込</button>${logs.length ? `<button class="btn" data-act="go-verify" data-id="${esc(t.id)}">検証画面で照合</button>` : `<button class="btn" data-act="log-new" data-task="${esc(t.id)}">実績を手動追加</button>`}</div>
+    <div class="row2"><button class="btn ghost" data-act="task-edit" data-id="${esc(t.id)}">内容を編集</button><button class="btn danger" data-act="task-del" data-id="${esc(t.id)}">削除</button></div>
+    <p class="note">作成 ${fmtDT(t.createdAt)}</p>`, {kind:'task', id:t.id});
+}
+function opinionCard(m, n, i){
+  const o = m.opinions[n] || {}, a = aiByName(n) || {};
+  const st = o.text ? ['em', '意見あり'] : o.sentAt ? ['info', '照会中'] : ['', '未照会'];
+  return `<div class="op">
+    <div class="hd"><b>${esc(n)}</b><span class="bd">${esc(a.role || '参加')}</span><span class="bd ${st[0]}">${st[1]}</span></div>
+    ${a.lens ? `<div class="note" style="margin-top:4px">観点：${esc(a.lens)}</div>` : ''}
+    <div class="row2"><button class="btn sm ${o.text ? '' : 'cyan'}" data-act="op-send" data-id="${esc(m.id)}" data-ai="${esc(n)}">${esc(n)}へ送る<small>${a.url ? 'コピー → アプリを開く' : 'コピーのみ'}</small></button><button class="btn sm ghost" data-act="op-toggle" data-i="${i}">${o.text ? '意見を見る・直す' : '回答を貼り付け'}</button></div>
+    <div id="op-box-${i}" class="${o.text ? 'hide' : (o.sentAt ? '' : 'hide')}">
+      <textarea class="in" id="op-${i}" maxlength="${LIMIT.opinion}" style="margin-top:10px;min-height:120px" placeholder="${esc(n)}の回答を貼り付け" aria-label="${esc(n)}の意見" oninput="this.dataset.dirty=1">${esc(o.text || '')}</textarea>
+      <div class="stack"><button class="btn sm primary" data-act="op-save" data-id="${esc(m.id)}" data-ai="${esc(n)}" data-i="${i}">意見を保存</button></div>
+    </div>
+  </div>`;
+}
+function openMeet(id){
+  const m = meetById(id); if(!m) return;
+  const tasks = S.tasks.filter(t => t.meetingId === m.id);
+  const chair = aiByName(S.settings.chair), scribe = S.settings.scribe ? aiByName(S.settings.scribe) : null;
+  const got = m.participants.filter(n => m.opinions[n] && m.opinions[n].text).length;
+  let no = 0;
+  openSheet(dispId(m.id), `
+    <h3>${esc(m.topic)}</h3>
+    <div class="meta"><span class="bd violet">${MTYPE[m.type].l}：${MTYPE[m.type].j}</span><span class="bd ${m.status === 'decided' ? 'em' : m.status === 'held' ? 'info' : 'warn'}">${MSTAT[m.status]}</span><span>${fmtDT(m.createdAt)}</span></div>
+    ${m.context ? `<details class="dt"><summary>背景・補足</summary><pre class="pv">${esc(m.context)}</pre></details>` : ''}
+    ${m.participants.length ? `<div class="step"><h4><span class="no">${++no}</span>意見を集める（${got}/${m.participants.length}）</h4>
+      <div class="note" style="margin-top:0">各AIへ送って、返ってきた回答を貼り付けて保存します。</div>
+      ${m.participants.map((n, i) => opinionCard(m, n, i)).join('')}</div>` : ''}
+    <div class="step"><h4><span class="no">${++no}</span>議長 ${esc(S.settings.chair)} に結論を出してもらう</h4>
+      <button class="btn primary big" data-act="chair-send" data-id="${esc(m.id)}">${esc(S.settings.chair)}で結論を出す<small>${m.participants.length ? `意見${got}件を添えて` : ''}${chair && chair.url ? 'プロンプトをコピー → アプリを開く' : 'プロンプトをコピー'}</small></button>
+      <details class="dt"><summary>議長へのプロンプトを表示</summary><pre class="pv">${esc(buildPrompt(m))}</pre></details>
+      <label class="f">議長の回答を貼り付け（結論・[指示]行を含む）</label>
+      <textarea class="in" id="meet-result" maxlength="${LIMIT.result}" style="min-height:160px" placeholder="${esc(S.settings.chair)}の回答をここに貼り付け" oninput="this.dataset.dirty=1">${esc(m.result || '')}</textarea>
+      <label class="f">結論メモ（任意）</label>
+      <input class="in" id="meet-conclusion" maxlength="${LIMIT.conclusion}" value="${esc(m.conclusion || '')}" placeholder="採否・決定事項を一行で">
+      <div class="row2"><button class="btn" data-act="meet-save-result" data-id="${esc(m.id)}">結果を保存</button><button class="btn primary" data-act="meet-extract" data-id="${esc(m.id)}">指示を抽出</button></div>
+      <div id="extract-area"></div>
+    </div>
+    ${scribe ? `<div class="step"><h4><span class="no">${++no}</span>議事録（${esc(scribe.name)}・任意）</h4>
+      <button class="btn sm ${m.result ? '' : 'ghost'}" data-act="minutes-send" data-id="${esc(m.id)}" ${m.result ? '' : 'disabled'}>${esc(scribe.name)}で議事録を作る<small>${m.result ? (scribe.url ? '会議の内容をコピー → アプリを開く' : '会議の内容をコピー') : '議長の回答を保存すると使えます'}</small></button>
+      <details class="dt" ${m.minutes ? '' : ''}><summary>${m.minutes ? '議事録を見る・直す' : '議事録を貼り付け'}</summary>
+        <textarea class="in" id="meet-minutes" maxlength="${LIMIT.minutes}" style="min-height:140px" aria-label="議事録" oninput="this.dataset.dirty=1">${esc(m.minutes || '')}</textarea>
+        <div class="stack"><button class="btn sm primary" data-act="minutes-save" data-id="${esc(m.id)}">議事録を保存</button></div>
+      </details></div>` : ''}
+    <label class="f">この会議の指示（${tasks.length}件）</label>
+    <div class="list" style="margin-top:0">${tasks.length ? tasks.map(taskCard).join('') : '<div class="empty">まだ指示はありません</div>'}</div>
+    <div class="row2"><button class="btn" data-act="meet-to-task" data-id="${esc(m.id)}">手動で指示作成</button><button class="btn danger" data-act="meet-del" data-id="${esc(m.id)}">会議を削除</button></div>`, {kind:'meet', id:m.id});
+}
+function openSync(){
+  const on = CONN.mode === 'sheet';
+  const n = pendingChanges();
+  openSheet('同期の状態', on ? `
+    <div class="meta"><span class="dot ${SYNC_STATE === 'syncing' ? 'pending' : SYNC_STATE}"></span><b style="color:var(--text);font-size:17px">${SYNC_STATE === 'error' ? '同期できていません' : SYNC_STATE === 'ok' ? '同期済み' : '同期待ち'}</b></div>
+    <div class="kv" style="margin-top:10px"><span>最終同期</span><b>${CONN.lastSync ? fmtDT(localDT(new Date(CONN.lastSync))) : '—'}</b><span>未送信の変更</span><b>${n}件</b><span>この端末</span><b>${esc(CONN.device)}</b></div>
+    ${CONN.lastError ? `<div class="alert">${esc(CONN.lastError)}</div>` : ''}
+    <div class="stack"><button class="btn primary" data-act="sync-now">今すぐ同期</button></div>
+    <p class="note">変更は自動で送られ、2分ごとと画面を開いたときに最新を取り込みます。電波がないときは端末に保存し、つながったときに送ります。</p>`
+  : `<p style="margin-top:0">この端末だけで使っています（スプレッドシート連携なし）。</p><div class="stack"><button class="btn primary" data-act="go" data-v="set">連携を設定する</button></div>`, {kind:'sync'});
+}
+function logForm(l, taskId){
+  const dt = l ? (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(l.datetime) ? l.datetime.slice(0,16) : '') : nowLocal();
+  const tid = l ? l.taskId : (taskId || '');
+  return `
+    ${l && dt === '' && l.datetime ? `<p class="alert">取込時の日時表記「${esc(l.datetime)}」を読めません。正しい日時を入れてください。</p>` : ''}
+    <label class="f">日時</label><input class="in" type="datetime-local" id="lf-dt" value="${dt}" max="${futureLimit()}">
+    <label class="f">案件ID（関連付け）</label>
+    <select class="in" id="lf-task"><option value="">未紐付</option>${[...S.tasks].sort(idSort).reverse().map(t => `<option value="${esc(t.id)}" ${t.id === tid ? 'selected' : ''}>${esc(dispId(t.id))}｜${esc(t.title.slice(0,20))}</option>`).join('')}${tid && !taskById(tid) ? `<option value="${esc(tid)}" selected>${esc(tid)}（未登録ID）</option>` : ''}</select>
+    <label class="f">担当区分</label><input class="in" id="lf-cat" maxlength="${LIMIT.category}" list="dl-ais" value="${esc(l ? l.category : (taskById(tid)?.assignee || (execAI() || {}).name || ''))}">
+    <datalist id="dl-ais">${aiNames().map(a => `<option value="${esc(a)}">`).join('')}</datalist>
+    <label class="f">作業内容</label><textarea class="in" id="lf-content" maxlength="${LIMIT.content}">${esc(l ? l.content : '')}</textarea>
+    <div class="grid2">
+      <div><label class="f">処理件数</label><input class="in" inputmode="numeric" id="lf-count" value="${l && l.count != null ? l.count : ''}" placeholder="未測定"></div>
+      <div><label class="f">削減時間（分）</label><input class="in" inputmode="numeric" id="lf-saved" value="${l && l.savedMin != null ? l.savedMin : ''}" placeholder="未測定"></div>
+    </div>
+    <label class="f">改善成果</label><input class="in" id="lf-outcome" maxlength="${LIMIT.short}" value="${esc(l ? l.outcome : '')}">
+    <label class="f">課題・確認事項</label><input class="in" id="lf-issue" maxlength="${LIMIT.short}" value="${esc(l ? (l.issue || '') : '')}">
+    ${l ? `<p class="note">検証状態：${VERIFY[l.verify]}（内容を変更すると「未確認」に戻ります）・取込元：${SOURCE[l.source]}</p>` : ''}
+    <p class="note">数値が空欄の項目は「未測定」として集計から除外されます。</p>
+    <div class="row2">${l ? `<button class="btn danger" data-act="log-del" data-id="${esc(l.id)}">削除</button>` : '<button class="btn ghost" data-act="close">キャンセル</button>'}<button class="btn primary" data-act="log-save" data-id="${l ? esc(l.id) : ''}">保存</button></div>`;
+}
+
+/* ================= 共通の保存処理 ================= */
+function validateTask(d, {isNew = true, current = null} = {}){
+  const e = [];
+  if(!d.title) e.push('件名が空欄です');
+  const le = lenErr(d.title, LIMIT.title, '件名'); if(le) e.push(le);
+  const ld = lenErr(d.detail, LIMIT.detail, '詳細'); if(ld) e.push(ld);
+  if(!d.assignee) e.push('担当AIを選択してください');
+  else if(!aiNames().includes(d.assignee)) e.push(`担当AI「${d.assignee}」は設定にありません`);
+  if(d.meetingId && !meetById(d.meetingId)) e.push(`関連会議 ${d.meetingId} が見つかりません`);
+  if(!PRI[d.priority]) e.push('優先度が不正です');
+  if(!APPROVAL[d.approval]) e.push('承認状態が不正です');
+  if(d.due){
+    const p = parseDateStr(d.due);
+    if(p === null) e.push(`期限「${d.due}」を日付として読めません`);
+    else if((isNew || (current && current.due !== p)) && p < today()) e.push(`期限 ${p} が過去の日付です`);
+  }
+  return e;
+}
+async function saveMeetingResult(m){
+  const result = $('#meet-result').value, conclusion = $('#meet-conclusion').value.trim();
+  const errs = [lenErr(result, LIMIT.result, '議長の回答'), lenErr(conclusion, LIMIT.conclusion, '結論メモ')].filter(Boolean);
+  if(errs.length){ await showErrors('入力を確認してください', errs); return false; }
+  if(result === m.result && conclusion === m.conclusion) return true;
+  const g = await guardFields({result, conclusion}); if(!g) return false;
+  m.result = g.result; m.conclusion = g.conclusion;
+  $('#meet-result').value = g.result; $('#meet-conclusion').value = g.conclusion; delete $('#meet-result').dataset.dirty;
+  if(m.status === 'draft' && g.result.trim()) m.status = 'held';
+  hist('会議結果を保存', m.id, g.conclusion); save(); renderAll();
+  return true;
+}
+function setStatus(t, s, why = ''){ const prev = t.status; t.status = s; hist('ステータス変更', t.id, `${STATUS_L[prev]} → ${STATUS_L[s]}${why ? '（' + why + '）' : ''}`); }
+
+/* ================= 操作 ================= */
+const actions = {
+  go: el => { closeSheet(); go(el.dataset.v); },
+  close: () => closeSheet(),
+  'home-filter': el => { homeFilter = el.dataset.f; renderHome(); },
+  'ap-filter': el => { apFilter = el.dataset.f; renderTasks(); },
+  'log-filter': el => { logFilter = el.dataset.f; renderLogs(); },
+  'v-filter': el => { vFilter = el.dataset.f; renderVerify(); },
+  'toggle-preview': () => { const p = $('#inst-pv'); if(p) p.classList.toggle('hide'); },
+  'op-toggle': el => { const b = $('#op-box-' + el.dataset.i); if(b) b.classList.toggle('hide'); },
+  'go-verify': el => { const t = taskById(el.dataset.id); closeSheet(); vFilter = reportState(t) === 'returned' ? 'returned' : t.status === 'done' ? 'done' : taskReports(t).some(l => l.verify === 'unverified') ? 'pending' : 'verified'; go('verify'); renderVerify(); },
+  'm-member'(el){ const n = el.dataset.ai; NEW_MEMBERS = NEW_MEMBERS.includes(n) ? NEW_MEMBERS.filter(x => x !== n) : [...NEW_MEMBERS, n]; renderMeet(); },
+  'set-member'(el){ const k = el.dataset.t, n = el.dataset.ai; SET_MEMBERS[k] = SET_MEMBERS[k].includes(n) ? SET_MEMBERS[k].filter(x => x !== n) : [...SET_MEMBERS[k], n]; renderSet(); },
+
+  /* --- 会議 --- */
+  async 'meet-create'(){
+    const topic = $('#m-topic').value.trim(), context = $('#m-context').value.trim();
+    const errs = [!topic ? '議題を入力してください' : null, lenErr(topic, LIMIT.topic, '議題'), lenErr(context, LIMIT.context, '背景・補足')].filter(Boolean);
+    if(errs.length){ await showErrors('入力を確認してください', errs); return; }
+    const g = await guardFields({topic, context}); if(!g) return;
+    const m = normMeeting({id:nid.m(), type:mtype, topic:g.topic, context:g.context, participants:[...NEW_MEMBERS], opinions:{}, status:'draft', createdAt:nowLocal()});
+    S.meetings.push(m);
+    $('#m-topic').value = ''; $('#m-context').value = ''; NEW_MEMBERS = null;
+    commit('会議を起動', m.id, `${MTYPE[m.type].l}｜${m.participants.length ? '意見役 ' + m.participants.join('・') + '｜' : ''}${m.topic}`);
+    openMeet(m.id);
+  },
+  'meet-open': el => openMeet(el.dataset.id),
+  'op-send'(el){
+    const m = meetById(el.dataset.id), n = el.dataset.ai; if(!m) return;
+    const text = buildOpinionPrompt(m, n);
+    if(scanText(text).length){ toast('機密情報らしき記載があるため送れません。安全点検で伏字にしてください'); return; }
+    const a = aiByName(n);
+    copyThenOpen(text, a && a.url);
+    m.opinions[n] = {...(m.opinions[n] || {text:'', at:''}), sentAt:nowISO()};
+    hist('意見照会を送付用にコピー', m.id, n); save(); renderAll();
+    const btn = $$('#sheet-body [data-act="op-send"]').find(b => b.dataset.ai === n);
+    const box = btn && btn.closest('.op');
+    if(box){ const i = box.querySelector('[data-act="op-toggle"]').dataset.i; const ob = document.getElementById('op-box-' + i); if(ob) ob.classList.remove('hide'); }
+  },
+  async 'op-save'(el){
+    const m = meetById(el.dataset.id), n = el.dataset.ai, ta = $('#op-' + el.dataset.i); if(!m || !ta) return;
+    const text = ta.value.trim();
+    if(!text){ toast('意見を貼り付けてください'); return; }
+    const le = lenErr(text, LIMIT.opinion, `${n}の意見`); if(le){ await showErrors('入力を確認してください', [le]); return; }
+    const g = await guardFields({opinion:text}, {opinion:`${n}の意見`}); if(!g) return;
+    m.opinions[n] = {...(m.opinions[n] || {}), text:g.opinion, at:nowISO()};
+    delete ta.dataset.dirty;
+    commit('意見を保存', m.id, n); toast(`${n}の意見を保存しました`); openMeet(m.id);
+  },
+  async 'chair-send'(el){
+    const m = meetById(el.dataset.id); if(!m) return;
+    const missing = m.participants.filter(n => !(m.opinions[n] && m.opinions[n].text));
+    const text = buildPrompt(m);
+    if(scanText(text).length){ toast('機密情報らしき記載があるため送れません。安全点検で伏字にしてください'); return; }
+    if(missing.length){
+      // iOSでは確認ダイアログ後のコピーがブロックされることがあるため、確認は表示のみにしてコピーは即時実行
+      toast(`未回答：${missing.join('、')}（回答なしで議長に送ります）`);
+    }
+    const chair = aiByName(S.settings.chair);
+    copyThenOpen(text, chair && chair.url);
+    m.prompt = text;
+    hist('議長プロンプトを送付用にコピー', m.id, `${S.settings.chair}${missing.length ? `（未回答 ${missing.join('・')}）` : ''}`); save();
+  },
+  'minutes-send'(el){
+    const m = meetById(el.dataset.id); if(!m) return;
+    const sc = S.settings.scribe ? aiByName(S.settings.scribe) : null; if(!sc) return;
+    const text = buildMinutesPrompt(m);
+    if(scanText(text).length){ toast('機密情報らしき記載があるため送れません'); return; }
+    copyThenOpen(text, sc.url);
+    hist('議事録依頼を送付用にコピー', m.id, sc.name); save();
+  },
+  async 'minutes-save'(el){
+    const m = meetById(el.dataset.id), ta = $('#meet-minutes'); if(!m || !ta) return;
+    const text = ta.value.trim();
+    const le = lenErr(text, LIMIT.minutes, '議事録'); if(le){ await showErrors('入力を確認してください', [le]); return; }
+    const g = await guardFields({minutes:text}); if(!g) return;
+    m.minutes = g.minutes; delete ta.dataset.dirty;
+    commit('議事録を保存', m.id, ''); toast('議事録を保存しました'); openMeet(m.id);
+  },
+  async 'meet-save-result'(el){ const m = meetById(el.dataset.id); if(await saveMeetingResult(m)){ toast('保存しました'); openMeet(m.id); } },
+  async 'meet-extract'(el){
+    const m = meetById(el.dataset.id);
+    if(!await saveMeetingResult(m)) return;
+    const ds = parseDirectives(m.result);
+    const area = $('#extract-area');
+    if(!ds.length){ area.innerHTML = '<div class="safe">[指示] 行が見つかりませんでした。議長の回答に「[指示] 担当：〇〇 ／ 内容：〇〇 ／ 期限：YYYY-MM-DD ／ 優先度：〇」の行があるか確認してください。</div>'; return; }
+    area.dataset.n = ds.length;
+    area.innerHTML = `<label class="f">抽出された指示（${ds.length}件）— 内容を確認・修正して登録</label>` + ds.map((d, i) => `
+      <div class="cand">
+        <label class="hd"><input type="checkbox" id="cd-on-${i}" checked>候補${i+1}${d.rawAssignee && !d.assignee ? `<span class="bd warn">担当「${esc(d.rawAssignee)}」は未設定のAI</span>` : ''}${d.rawDue && !d.due ? `<span class="bd warn">期限「${esc(d.rawDue)}」を読めません</span>` : ''}</label>
+        <input class="in sm" id="cd-title-${i}" maxlength="${LIMIT.title}" value="${esc(d.title)}" aria-label="候補${i+1}の件名">
+        <div class="g3">
+          <select class="in sm" id="cd-as-${i}" aria-label="担当">${aiOptions(d.assignee, true)}</select>
+          <input class="in sm" type="date" id="cd-due-${i}" value="${d.due}" aria-label="期限">
+          <select class="in sm" id="cd-pri-${i}" aria-label="優先度">${Object.entries(PRI).map(([k, l]) => `<option value="${k}" ${k === d.priority ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        </div>
+      </div>`).join('') +
+      `<p class="note">登録時の承認状態は「未承認」（送付不可）になります。</p><div class="stack"><button class="btn primary" data-act="meet-register" data-id="${esc(m.id)}">選択した指示を案件登録</button></div>`;
+  },
+  async 'meet-register'(el){
+    const m = meetById(el.dataset.id); const area = $('#extract-area'); const n = +area.dataset.n || 0;
+    const cands = [];
+    for(let i = 0; i < n; i++){
+      if(!$('#cd-on-' + i).checked) continue;
+      cands.push({i, title:$('#cd-title-' + i).value.trim(), assignee:$('#cd-as-' + i).value, due:$('#cd-due-' + i).value, priority:$('#cd-pri-' + i).value});
+    }
+    if(!cands.length){ toast('登録する指示を選択してください'); return; }
+    if(!await saveMeetingResult(m)) return;
+    const errs = [];
+    cands.forEach(c => validateTask({...c, detail:'', meetingId:m.id, approval:'pending'}, {isNew:true}).forEach(e => errs.push(`候補${c.i+1}：${e}`)));
+    if(errs.length){ await showErrors('候補の内容を確認してください', errs); return; }
+    const labels = Object.fromEntries(cands.map(c => ['t' + c.i, `候補${c.i+1}の件名`]));
+    const g = await guardFields(Object.fromEntries(cands.map(c => ['t' + c.i, c.title])), labels); if(!g) return;
+    if(!await ask('案件登録', `${cands.length}件の指示を「未承認」の案件として登録します。`, '登録する')) return;
+    m.status = 'decided';
+    const ids = cands.map(c => {
+      const t = normTask({id:nid.t(), meetingId:m.id, title:g['t' + c.i], assignee:c.assignee, priority:c.priority, due:parseDateStr(c.due) || '', approval:'pending', status:'todo', createdAt:nowLocal()});
+      S.tasks.push(t); return t.id;
+    });
+    commit('会議から案件を登録', m.id, ids.join(', '));
+    toast(`${ids.length}件を登録しました（未承認）`); openMeet(m.id);
+  },
+  'meet-to-task'(el){ closeSheet(); actions['tf-clear'](); go('task'); fillTaskSelects(); $('#tf-meeting').value = rid(el.dataset.id); $('#tf-title').focus(); },
+  async 'meet-del'(el){
+    const m = meetById(el.dataset.id); const n = S.tasks.filter(t => t.meetingId === m.id).length;
+    if(!await ask('会議を削除', `${dispId(m.id)}「${m.topic}」を削除します。${n ? `\n関連する案件${n}件は残り、会議との関連付けだけ外れます。` : ''}${CONN.mode === 'sheet' ? '\nスプレッドシートと他の端末からも削除されます。' : ''}`, '削除する', true)) return;
+    backup();
+    S.meetings = S.meetings.filter(x => x.id !== m.id);
+    S.tasks.forEach(t => { if(t.meetingId === m.id) t.meetingId = ''; });
+    closeSheet(); commit('会議を削除', m.id, m.topic);
+  },
+
+  /* --- 指示 --- */
+  async 'tf-save'(){
+    const data = {title:$('#tf-title').value.trim(), detail:$('#tf-detail').value.trim(), assignee:$('#tf-assignee').value, meetingId:$('#tf-meeting').value,
+      priority:$('#tf-priority').value, due:$('#tf-due').value, approval:$('#tf-approval').value};
+    const cur = editingTask ? taskById(editingTask) : null;
+    const errs = validateTask(data, {isNew:!cur, current:cur});
+    if(errs.length){ await showErrors('入力を確認してください', errs); return; }
+    const g = await guardFields({title:data.title, detail:data.detail}); if(!g) return;
+    data.title = g.title; data.detail = g.detail; data.due = parseDateStr(data.due) || ''; data.meetingId = data.meetingId ? rid(data.meetingId) : '';
+    let t;
+    if(cur){
+      t = cur;
+      if(!await ask('内容を更新', `${dispId(t.id)} の内容を更新します。${t.sends.length ? '\n送付済みの指示です。変更後は再送付してください。' : ''}`, '更新する')) return;
+      Object.assign(t, data);
+      if(t.approval !== 'approved' && ['doing','review'].includes(t.status)) setStatus(t, 'hold', '承認が外れたため');
+      commit('案件を編集', t.id, t.title);
+    }else{
+      t = normTask({id:nid.t(), ...data, status:'todo', createdAt:nowLocal()});
+      S.tasks.push(t);
+      commit('案件を発行', t.id, `${t.assignee}｜${APPROVAL[t.approval]}｜${t.title}`);
+    }
+    actions['tf-clear']();
+    openTask(t.id);
+  },
+  'tf-clear'(){
+    editingTask = null;
+    ['#tf-title','#tf-detail','#tf-due'].forEach(s => $(s).value = '');
+    $('#tf-priority').value = 'mid'; $('#tf-approval').value = 'pending'; $('#tf-meeting').value = '';
+    $('#tf-heading').textContent = 'AI指示を発行'; $('#tf-save').textContent = '案件IDを発行';
+  },
+  'task-open': el => openTask(el.dataset.id),
+  'send-task'(el){
+    const t = taskById(el.dataset.id);
+    if(!t || !canSend(t)){ toast(t && isTmp(t.id) ? '案件IDの付番（同期）を待っています' : '未承認・却下・保留・完了の指示は送付できません'); return; }
+    const text = buildInstruction(t);
+    if(scanText(text).length){ toast('機密情報らしき記載があるため送付できません。内容を編集してください'); return; }
+    const ai = aiByName(t.assignee);
+    copyThenOpen(text, ai && ai.url);
+    t.instruction = text; t.sends.push({at:nowISO(), to:t.assignee});
+    if(t.status === 'todo') setStatus(t, 'doing', `${t.assignee}へ送付`);
+    hist('指示を送付', t.id, `${t.assignee}（${t.sends.length}回目）`); save(); renderAll(); openTask(t.id);
+  },
+  'copy-task'(el){
+    const t = taskById(el.dataset.id);
+    if(!t || !canSend(t)){ toast('未承認の指示はコピーできません（確認用プレビューのみ）'); return; }
+    const text = buildInstruction(t);
+    if(scanText(text).length){ toast('機密情報らしき記載があるためコピーできません'); return; }
+    copyText(text); t.instruction = text;
+    hist('指示文をコピー', t.id, t.assignee); save();
+  },
+  async 'task-reassign'(el){
+    const t = taskById(el.dataset.id), ai = el.dataset.ai;
+    if(!t || !aiNames().includes(ai)) return;
+    if(!await ask('担当AIの変更', `${t.id} の担当を「${t.assignee}」から「${ai}」に変更します。\n指示文は${ai}向けに作り直されます。変更後に「${ai}へ送る」を押してください。`, '変更する')) return;
+    const prev = t.assignee; t.assignee = ai;
+    commit('担当AIを変更', t.id, `${prev} → ${ai}`); openTask(t.id);
+  },
+  async 'task-status'(el){
+    const t = taskById(el.dataset.id), s = el.dataset.s; if(!t || t.status === s) return;
+    if(['doing','review','done'].includes(s) && t.approval !== 'approved'){
+      await choose('承認が必要です', `${dispId(t.id)} は「${APPROVAL[t.approval]}」です。\n実行中・確認待ち・完了にするには、先に承認してください。`, [['閉じる','ok','primary']]); return;
+    }
+    if(s === 'done'){
+      const rs = reportState(t);
+      if(rs !== 'verified'){
+        const msg = rs === 'none' ? 'この案件には完了報告がありません。' : rs === 'received' ? '完了報告はありますが、まだ確認していません。' : '報告はすべて差し戻し中です。';
+        const c = await choose('完了報告が未確認です', `${msg}\n原則として、確認済の報告がある案件だけを完了にできます。`,
+          [['戻る','cancel','ghost'], ...(rs === 'none' ? [] : [['検証画面で確認する','verify','primary']]), ['例外として完了にする','override','warn']]);
+        if(c === 'verify'){ actions['go-verify']({dataset:{id:t.id}}); return; }
+        if(c !== 'override') return;
+        const reason = await promptText('例外完了の理由', '報告を確認せずに完了にする理由を記録します（履歴に残ります）。', {placeholder:'例：口頭で完了を確認済み', min:5, okLabel:'例外として完了', danger:true});
+        if(!reason) return;
+        const g = await guardFields({reason}); if(!g) return;
+        t.doneBasis = 'override'; t.doneReason = g.reason;
+        setStatus(t, 'done', '例外完了：' + g.reason);
+        commit('例外完了', t.id, g.reason); closeSheet(); toast('例外として完了にしました');
+        return;
+      }
+      if(!await ask('完了にする', `${t.id}「${t.title}」を完了にします。\n確認済の報告：${taskReports(t).filter(l => l.verify === 'verified').map(l => l.id).join('、')}`, '完了にする')) return;
+      t.doneBasis = 'verified'; t.doneReason = '';
+      setStatus(t, 'done', '報告確認済');
+      commit('案件を完了', t.id, '報告確認済');
+      if($('#sheet').classList.contains('show') && OPEN && OPEN.kind === 'task') openTask(t.id);
+      toast('完了にしました'); return;
+    }
+    if(t.status === 'done' && !await ask('完了を取り消す', `${t.id} を「${STATUS_L[s]}」に戻します。`, '戻す')) return;
+    if(t.status === 'done'){ t.doneBasis = ''; t.doneReason = ''; }
+    setStatus(t, s); save(); renderAll(); openTask(t.id);
+  },
+  async 'task-approval'(el){
+    const t = taskById(el.dataset.id), s = el.dataset.s; if(!t || t.approval === s) return;
+    const extra = s === 'approved' ? '\n承認すると、この指示をAIへ送付できるようになります。' : t.sends.length ? '\n※すでに送付済みです。担当AIへ中止の連絡が必要な場合があります。' : '';
+    if(!await ask('承認状態の変更', `${dispId(t.id)} を「${APPROVAL[s]}」に変更します。${extra}`, '変更する', s === 'rejected')) return;
+    const prev = t.approval; t.approval = s;
+    hist('承認状態変更', t.id, `${APPROVAL[prev]} → ${APPROVAL[s]}`);
+    if(s !== 'approved' && ['doing','review'].includes(t.status)) setStatus(t, 'hold', '承認が外れたため');
+    save(); renderAll(); openTask(t.id);
+  },
+  'task-edit'(el){
+    const t = taskById(el.dataset.id); closeSheet(); go('task'); fillTaskSelects();
+    editingTask = t.id;
+    $('#tf-title').value = t.title; $('#tf-detail').value = t.detail || ''; $('#tf-assignee').value = t.assignee;
+    $('#tf-meeting').value = t.meetingId || ''; $('#tf-priority').value = t.priority; $('#tf-due').value = t.due || ''; $('#tf-approval').value = t.approval;
+    $('#tf-heading').textContent = `編集中：${dispId(t.id)}`; $('#tf-save').textContent = '更新する';
+  },
+  async 'task-del'(el){
+    const t = taskById(el.dataset.id); const n = taskReports(t).length;
+    if(!await ask('案件を削除', `${dispId(t.id)}「${t.title}」を削除します。${n ? `\n紐付いた報告${n}件は残り、「照合不可」に移ります。` : ''}${CONN.mode === 'sheet' ? '\nスプレッドシートと他の端末からも削除されます。' : ''}`, '削除する', true)) return;
+    backup();
+    S.tasks = S.tasks.filter(x => x.id !== t.id);
+    S.logs.forEach(l => { if(l.taskId === t.id){ l.taskId = ''; l.issue = [l.issue, `元の案件 ${t.id} は削除済み`].filter(Boolean).join(' ／ '); } });
+    closeSheet(); commit('案件を削除', t.id, t.title);
+  },
+
+  /* --- 検証 --- */
+  async 'rep-verify'(el){
+    const l = logById(el.dataset.id), t = l && taskById(l.taskId); if(!t) return;
+    const flags = reportFlags(l, t).filter(([c]) => c === 'danger' || c === 'warn').map(([, x]) => x);
+    if(!await ask('報告を確認済にする', `${l.id}（${t.id}）の報告内容を確認済にします。${flags.length ? `\n\n注意点：\n・${flags.join('\n・')}` : ''}`, '確認済にする')) return;
+    l.verify = 'verified'; l.verifiedAt = nowISO(); l.verifyNote = '';
+    if(t.approval === 'approved' && ['todo','doing'].includes(t.status)) setStatus(t, 'review', '報告確認');
+    commit('報告を確認済', l.id, t.id);
+    toast(t.status === 'done' ? '確認済にしました' : '確認済にしました。完了にできます');
+  },
+  async 'rep-reject'(el){
+    const l = logById(el.dataset.id), t = l && taskById(l.taskId); if(!t) return;
+    const reason = await promptText('差し戻し', `${l.id} を差し戻します。理由を入力してください（担当AIへの差し戻し文に入ります）。`, {placeholder:'例：処理件数の根拠がない。対象期間を明記して再報告', min:2, okLabel:'差し戻す', danger:true});
+    if(!reason) return;
+    const g = await guardFields({note:reason}); if(!g) return;
+    l.verify = 'rejected'; l.verifyNote = g.note; l.verifiedAt = nowISO();
+    if(t.status === 'review' && reportState(t) !== 'verified') setStatus(t, 'doing', '報告差し戻し');
+    commit('報告を差し戻し', l.id, `${t.id}｜${g.note}`);
+  },
+  async 'rep-reset'(el){
+    const l = logById(el.dataset.id), t = l && taskById(l.taskId);
+    if(t && t.status === 'done' && t.doneBasis === 'verified' && l.verify === 'verified' && taskReports(t).filter(x => x.verify === 'verified').length === 1){
+      await choose('戻せません', `${t.id} はこの報告の確認をもとに完了しています。\n先に案件のステータスを完了以外に戻してください。`, [['閉じる','ok','primary']]); return;
+    }
+    if(!await ask('未確認に戻す', `${l.id} の検証結果を取り消します。`, '戻す')) return;
+    l.verify = 'unverified'; l.verifyNote = ''; l.verifiedAt = '';
+    commit('報告を未確認に戻す', l.id, t ? t.id : '');
+  },
+  'verifier-send'(el){
+    const t = taskById(el.dataset.id); if(!t) return;
+    const vf = S.settings.verifier; const text = buildVerifyPrompt(t, vf);
+    if(scanText(text).length){ toast('機密情報らしき記載があるため送れません。安全点検で伏字にしてください'); return; }
+    const a = aiByName(vf);
+    copyThenOpen(text, a && a.url);
+    hist('検証依頼を送付用にコピー', t.id, vf); save();
+  },
+  'return-send'(el){
+    const l = logById(el.dataset.id), t = l && taskById(l.taskId);
+    if(!t || !canSend(t)){ toast('承認済で進行中の案件のみ差し戻し文を送れます'); return; }
+    const text = buildReturnMessage(t, l);
+    if(scanText(text).length){ toast('機密情報らしき記載があるため送れません'); return; }
+    const ai = aiByName(t.assignee);
+    copyThenOpen(text, ai && ai.url);
+    t.sends.push({at:nowISO(), to:t.assignee, kind:'return'});
+    hist('差し戻しを送付', t.id, `${l.id} → ${t.assignee}`); save(); renderAll();
+  },
+  async 'rep-link'(el){
+    const l = logById(el.dataset.id), sel = document.getElementById('lk-' + l.id), tid = sel ? sel.value : '';
+    const t = taskById(tid); if(!t){ toast('紐付ける案件を選択してください'); return; }
+    const key = fp({...l, taskId:t.id});
+    if(S.logs.some(x => x.id !== l.id && fp(x) === key)){ await choose('重複しています', `${t.id} には同じ日時・同じ内容の報告がすでにあります。`, [['閉じる','ok','primary']]); return; }
+    if(!await ask('案件に紐付け', `${l.id} を ${t.id}「${t.title}」の報告として紐付けます。`, '紐付ける')) return;
+    const prev = l.taskId; l.taskId = t.id; l.verify = 'unverified';
+    commit('報告を案件に紐付け', l.id, `${prev || '未紐付'} → ${t.id}`);
+  },
+
+  /* --- 実績 --- */
+  'log-new'(el){ openSheet('実績を追加', logForm(null, el.dataset.task)); },
+  'log-open'(el){ const l = logById(el.dataset.id); if(l) openSheet(dispId(l.id), logForm(l)); },
+  async 'log-save'(el){
+    const editing = el.dataset.id ? logById(el.dataset.id) : null;
+    const raw = {datetime:$('#lf-dt').value, taskId:$('#lf-task').value, category:$('#lf-cat').value, content:$('#lf-content').value,
+      count:$('#lf-count').value, savedMin:$('#lf-saved').value, outcome:$('#lf-outcome').value, issue:$('#lf-issue').value};
+    const tmpTask = isTmp(raw.taskId) ? raw.taskId : '';
+    if(tmpTask) raw.taskId = '';
+    const row = prepareLog(raw, {source:editing ? editing.source : 'manual'});
+    if(tmpTask){ row.v.taskId = tmpTask; row.unknown = false; }
+    if(row.unknown && !(editing && editing.taskId === row.v.taskId)) row.errors.push(`案件ID ${row.v.taskId} は登録されていません`);
+    if(row.errors.length){ await showErrors('入力を確認してください', row.errors); return; }
+    markDups([row], editing ? editing.id : '');
+    if(row.dup){ await showErrors('重複しています', ['同じ日時・案件ID・作業内容の実績がすでに登録されています']); return; }
+    const g = await guardFields({content:row.v.content, outcome:row.v.outcome, issue:row.v.issue, category:row.v.category}); if(!g) return;
+    Object.assign(row.v, g);
+    if(editing){
+      const changed = ['datetime','taskId','category','content','count','savedMin','outcome','issue'].some(k => String(editing[k] ?? '') !== String(row.v[k] ?? ''));
+      if(changed && editing.verify !== 'unverified'){
+        const t = taskById(editing.taskId);
+        if(t && t.status === 'done' && t.doneBasis === 'verified' && editing.verify === 'verified' && taskReports(t).filter(x => x.verify === 'verified').length === 1){
+          await showErrors('変更できません', [`${t.id} はこの報告の確認をもとに完了しています。先に案件のステータスを戻してください。`]); return;
+        }
+        if(!await ask('確認済の報告を変更', '内容を変更すると検証状態が「未確認」に戻ります。', '変更する')) return;
+      }
+      const keep = {id:editing.id, source:editing.source, verify:changed ? 'unverified' : editing.verify, verifyNote:changed ? '' : editing.verifyNote, verifiedAt:changed ? '' : editing.verifiedAt};
+      Object.assign(editing, row.v, keep);
+      commit('実績を編集', editing.id, editing.content.slice(0,30));
+    }else{
+      const l = normLog({id:nid.l(), ...row.v}); S.logs.push(l); commit('実績を追加', l.id, l.content.slice(0,30));
+    }
+    closeSheet(); toast('保存しました');
+  },
+  async 'log-del'(el){
+    const l = logById(el.dataset.id), t = l && taskById(l.taskId);
+    if(t && t.status === 'done' && t.doneBasis === 'verified' && l.verify === 'verified' && taskReports(t).filter(x => x.verify === 'verified').length === 1){
+      await showErrors('削除できません', [`${t.id} はこの報告の確認をもとに完了しています。先に案件のステータスを戻してください。`]); return;
+    }
+    if(!await ask('実績を削除', `${dispId(l.id)}「${(l.content || '').slice(0,40)}」を削除します。`, '削除する', true)) return;
+    backup(); S.logs = S.logs.filter(x => x.id !== l.id); closeSheet(); commit('実績を削除', l.id, (l.content || '').slice(0,30));
+  },
+  'log-paste'(el){
+    openSheet('報告を貼付取込', `
+      <p class="note" style="margin-top:0">担当AIから返ってきた完了報告（指示文末尾の形式）を貼り付けてください。複数件まとめて貼り付けできます。${CONN.mode === 'sheet' ? '<br>連携中は、LINEやメール（件名「BM報告」）に送るだけでも自動で記録されます。' : ''}</p>
+      <textarea class="in" id="paste-text" style="min-height:220px" aria-label="報告の貼り付け" placeholder="案件ID：RZ-0001&#10;実施日時：2026-10-17 15:00&#10;担当区分：Grok Bot&#10;作業内容：…&#10;処理件数：12&#10;削減時間（分）：45&#10;改善成果：…">${el.dataset.task && !isTmp(el.dataset.task) ? `案件ID：${esc(el.dataset.task)}\n` : ''}</textarea>
+      <div class="stack"><button class="btn primary" data-act="paste-parse">内容を確認</button></div>`);
+  },
+  'paste-parse'(){
+    const blocks = splitReports($('#paste-text').value);
+    if(!blocks.length){ toast('「案件ID：」または「作業内容：」の行が見つかりません'); return; }
+    const rows = markDups(blocks.map((b, i) => prepareLog(b, {source:'paste', rowLabel:`報告${i+1}${b.taskId ? '（' + b.taskId + '）' : ''}`})));
+    openImportPreview(rows, 'paste', '報告の取込確認');
+  },
+  'csv-pick'(){ $('#csv-file').value = ''; $('#csv-file').click(); },
+  'csv-template'(){
+    download('BM_実績取込見本.csv', toCSV([
+      ['日時','担当区分','作業内容','案件ID','処理件数','削減時間(分)','改善成果','課題・確認事項'],
+      ['2026-10-17 09:30','Grok Bot','作業日報の集計','RZ-0001','24','40','集計を自動化',''],
+      ['2026-10-17 13:00','Grok Bot','翻訳チェック','','','','','空欄の数値は未測定']
+    ]), 'text/csv');
+    hist('CSV見本を書き出し', '—'); save();
+  },
+  async 'import-commit'(){
+    const {rows, source} = PENDING; if(!rows.length) return;
+    const allowUnknown = !!$('#imp-unknown')?.checked;
+    const sensMode = (document.querySelector('input[name=imp-sens]:checked') || {}).value || 'exclude';
+    const toReview = source === 'paste' && !!$('#imp-review')?.checked;
+    markDups(rows);
+    const take = [], skipped = {err:0, dup:0, unknown:0, sens:0};
+    rows.forEach(r => {
+      if(r.errors.length){ skipped.err++; return; }
+      if(r.dup){ skipped.dup++; return; }
+      const v = {...r.v};
+      if(r.unknown){ if(!allowUnknown){ skipped.unknown++; return; } v.issue = [v.issue, `元の案件ID ${v.taskId}（未登録）`].filter(Boolean).join(' ／ '); v.taskId = ''; }
+      if(r.sens.length){ if(sensMode !== 'mask'){ skipped.sens++; return; } ['content','outcome','issue','category'].forEach(k => v[k] = maskText(v[k])); }
+      take.push(v);
+    });
+    if(!take.length){ toast('取り込める行がありません'); return; }
+    if(!await ask('取り込む', `${take.length}件を取り込みます。\n除外：エラー${skipped.err}／重複${skipped.dup}／未登録ID${skipped.unknown}／機密${skipped.sens}`, '取り込む')) return;
+    const ids = [];
+    take.forEach(v => {
+      const l = normLog({id:nid.l(), ...v}); S.logs.push(l); ids.push(l.id);
+      const t = taskById(l.taskId);
+      if(toReview && t && t.approval === 'approved' && ['todo','doing'].includes(t.status)) setStatus(t, 'review', '報告受領');
+    });
+    commit(source === 'paste' ? '報告を貼付取込' : 'CSVを取込', `${ids.length}件`, `除外 エラー${skipped.err}・重複${skipped.dup}・未登録${skipped.unknown}・機密${skipped.sens}`);
+    PENDING = {rows:[], source:''}; closeSheet(); toast(`${ids.length}件を取り込みました`);
+    if(source === 'paste'){ vFilter = 'pending'; go('verify'); renderVerify(); } else go('log');
+  },
+
+  /* --- 安全点検 --- */
+  'audit-open'(){
+    const a = auditAll();
+    openSheet('安全点検', a.length ? `
+      <p class="note" style="margin-top:0">保存済みデータの中で、機密情報らしき記載が見つかった箇所です（該当部分は一部のみ表示）。</p>
+      <div class="list">${a.slice(0,60).map(x => `<div class="card" style="padding:10px 12px"><div class="meta"><span class="bd">${esc(x.kind)}</span><span class="id">${esc(x.id)}</span></div><div class="note" style="margin-top:4px">${x.hits.map(h => `${esc(h.field)}：${esc(h.k)}（${esc(h.sample)}）`).join('<br>')}</div></div>`).join('')}</div>
+      ${a.length > 60 ? `<p class="note">…ほか${a.length-60}件</p>` : ''}
+      <div class="stack"><button class="btn danger" data-act="audit-mask">すべて伏字にする</button></div>
+      <p class="note">伏字にする前の状態は「直前の状態に戻す」で1回だけ戻せます。${CONN.mode === 'sheet' ? '伏字にした内容はスプレッドシートにも反映されます。' : ''}</p>`
+      : '<div style="color:var(--em)">✓ 機密情報らしき記載は見つかりませんでした</div>');
+  },
+  async 'audit-mask'(){
+    const n = auditAll().length;
+    if(!await ask('すべて伏字にする', `${n}件の該当箇所を「［伏字:種類］」に置き換えます。`, '伏字にする', true)) return;
+    backup(); maskAll(); closeSheet(); commit('機密情報を伏字化', `${n}件`); toast('伏字にしました');
+  },
+
+  /* --- 連携 --- */
+  'open-sync': () => openSync(),
+  async 'sync-now'(){ if(CONN.mode !== 'sheet'){ toast('連携していません'); return; } const ok = await sync(); if(ok) toast('同期しました'); },
+  async 'conn-test'(){
+    const url = $('#c-url').value.trim(), token = $('#c-token').value.trim();
+    if(!url || !token){ toast('URLとトークンを入力してください'); return; }
+    const prev = {url:CONN.url, token:CONN.token};
+    CONN.url = url; CONN.token = token;
+    try{ const r = await api('ping'); toast(`接続できました（${r.sheet || 'シート'}：会議${r.counts.meetings}／案件${r.counts.tasks}／実績${r.counts.logs}）`); }
+    catch(e){ await choose('接続できません', e.message, [['閉じる','ok','primary']]); }
+    finally{ CONN.url = prev.url; CONN.token = prev.token; }
+  },
+  async 'conn-start'(){
+    const url = $('#c-url').value.trim(), token = $('#c-token').value.trim(), device = $('#c-device').value.trim().slice(0,20) || guessDevice();
+    if(!/^https:\/\/script\.google\.com\/(?:a\/macros\/[^\/\s]+|macros)\/s\/[\w-]+\/exec$/.test(url)){ await showErrors('連携URLを確認してください', ['「https://script.google.com/macros/s/…/exec」の形のURLを貼り付けてください']); return; }
+    if(token.length < 16){ await showErrors('トークンを確認してください', ['セットアップ時に表示されたトークンを貼り付けてください']); return; }
+    if(scanText(device).length){ toast('端末名に使えない文字が含まれています'); return; }
+    Object.assign(CONN, {url, token, device});
+    let info;
+    try{ info = await api('ping'); }catch(e){ await choose('接続できません', e.message, [['閉じる','ok','primary']]); return; }
+    const sc = info.counts.meetings + info.counts.tasks + info.counts.logs;
+    const lc = S.meetings.length + S.tasks.length + S.logs.length;
+    let mode = 'push';
+    if(sc && lc){
+      const c = await choose('シートにデータがあります', `シート：会議${info.counts.meetings}／案件${info.counts.tasks}／実績${info.counts.logs}\nこの端末：会議${S.meetings.length}／案件${S.tasks.length}／実績${S.logs.length}\n\nシートのデータを使います。この端末のデータはJSONファイルに書き出してから置き換えます。`, [['やめる','cancel','ghost'], ['シートのデータを使う','pull','primary']]);
+      if(c !== 'pull') return;
+      mode = 'pull';
+      download(`BM_Control_端末退避_${stamp()}.json`, JSON.stringify(S, null, 2), 'application/json');
+      backup();
+      const st = S.settings; S = fresh(); S.settings = st;
+    }else if(sc){ mode = 'pull'; }
+    else if(lc){
+      if(!await ask('この端末のデータをシートへ送る', `会議${S.meetings.length}／案件${S.tasks.length}／実績${S.logs.length}件をスプレッドシートへ送ります。以後はシートが本体になります。`, '送る')) return;
+    }
+    CONN.mode = 'sheet'; CONN.lastError = ''; saveConn();
+    SY = {h:emptyHashes()}; saveSY();
+    hist('スプレッドシート連携を開始', CONN.device, mode === 'pull' ? 'シートのデータを使用' : 'この端末のデータを送信');
+    const ok = await sync(mode === 'pull' ? {pullOnly:true, adoptSettings:true} : {});
+    if(ok && mode === 'pull') await sync();
+    if(ok) toast('連携を開始しました'); renderAll(); renderSet();
+  },
+  async 'conn-stop'(){
+    if(!await ask('連携を解除', 'この端末だけで使う状態に戻します。データは端末に残ります。スプレッドシートのデータは消えません。', '解除する', true)) return;
+    if(pendingChanges()) await sync({quiet:true});
+    const map = {};
+    S.meetings.forEach(m => { if(isTmp(m.id)) map[m.id] = `BM-${String(++S.seq.m).padStart(4,'0')}`; });
+    S.seq.m = Math.max(S.seq.m, ...S.meetings.map(x => idNum(x.id)), 0);
+    S.seq.t = Math.max(S.seq.t, ...S.tasks.map(x => idNum(x.id)), 0);
+    S.seq.l = Math.max(S.seq.l, ...S.logs.map(x => idNum(x.id)), 0);
+    S.tasks.forEach(t => { if(isTmp(t.id)) map[t.id] = `RZ-${String(++S.seq.t).padStart(4,'0')}`; });
+    S.logs.forEach(l => { if(isTmp(l.id)) map[l.id] = `L-${String(++S.seq.l).padStart(5,'0')}`; });
+    renameIds(map);
+    CONN.mode = 'local'; CONN.lastError = ''; saveConn();
+    commit('スプレッドシート連携を解除', CONN.device); toast('連携を解除しました'); renderSet();
+  },
+
+  /* --- 設定・データ --- */
+  async 'set-save'(){
+    const errs = [];
+    const company = $('#s-company').value.trim();
+    if(!company) errs.push('組織名を入力してください');
+    const le = lenErr(company, LIMIT.company, '組織名'); if(le) errs.push(le);
+    const sd = parseDateStr($('#s-start').value); if(!sd) errs.push('検証開始日を正しく入力してください');
+    const {out:ais, errs:aErr} = parseAIs($('#s-ais').value); errs.push(...aErr);
+    const names = ais.map(a => a.name);
+    const inUse = [...new Set(S.tasks.filter(t => t.status !== 'done').map(t => t.assignee))].filter(n => !names.includes(n));
+    if(inUse.length) errs.push(`未完了の案件で使用中のAIは削除できません：${inUse.join('、')}`);
+    const chair = $('#s-chair').value, verifier = $('#s-verifier').value, scribe = $('#s-scribe').value;
+    if(!names.includes(chair)) errs.push('議長AIがAI設定にありません');
+    if(errs.length){ await showErrors('設定を確認してください', errs); return; }
+    const g = await guardFields({company, lens:ais.map(a => a.lens + ' ' + a.role).join('\n')}, {company:'組織名', lens:'AI設定'}); if(!g) return;
+    S.settings = normSettings({...S.settings, company:g.company, startDate:sd, ais:ais.map(a => ({...a, lens:maskText(a.lens), role:maskText(a.role)})), chair, verifier, scribe, members:SET_MEMBERS});
+    SET_MEMBERS = null; NEW_MEMBERS = null;
+    commit('設定を変更', 'settings', `組織名 ${S.settings.company}／検証開始日 ${sd}／AI ${names.length}件`); renderSet(); toast('設定を保存しました');
+  },
+  'json-export'(){
+    S.meta.lastExport = nowISO();
+    hist('JSONを書き出し', '全データ'); save();
+    download(`BM_Control_backup_${stamp()}.json`, JSON.stringify(S, null, 2), 'application/json');
+    renderAll();
+  },
+  'json-pick'(){ $('#json-file').value = ''; $('#json-file').click(); },
+  'csv-tasks'(){
+    download(`BM_案件_${stamp()}.csv`, toCSV([['案件ID','件名','担当','関連会議','優先度','期限','承認','ステータス','報告状態','完了根拠','送付回数','最終送付','詳細','作成日時'],
+      ...S.tasks.map(t => { const ls = lastSend(t); return [dispId(t.id), t.title, t.assignee, t.meetingId, PRI[t.priority], t.due, APPROVAL[t.approval], STATUS_L[t.status], REPORT_STATE[reportState(t)],
+        t.doneBasis === 'override' ? '例外：' + t.doneReason : (DONE_BASIS[t.doneBasis] || ''), t.sends.length, ls ? fmtDT(localDT(new Date(ls.at))) : '', t.detail, fmtDT(t.createdAt)]; })]), 'text/csv');
+    hist('案件CSVを書き出し', `${S.tasks.length}件`); save();
+  },
+  'csv-logs'(){
+    download(`BM_実績_${stamp()}.csv`, toCSV([['実績ID','日時','担当区分','作業内容','案件ID','処理件数','削減時間(分)','改善成果','課題・確認事項','取込元','検証状態','差し戻し理由'],
+      ...S.logs.map(l => [dispId(l.id), fmtDT(l.datetime), l.category, l.content, l.taskId, l.count ?? '', l.savedMin ?? '', l.outcome, l.issue || '', SOURCE[l.source] || '', VERIFY[l.verify], l.verifyNote])]), 'text/csv');
+    hist('実績CSVを書き出し', `${S.logs.length}件`); save();
+  },
+  'csv-meetings'(){
+    download(`BM_会議_${stamp()}.csv`, toCSV([['会議ID','種別','議題','意見役','状態','結論','関連指示数','日時'],
+      ...S.meetings.map(m => [dispId(m.id), MTYPE[m.type].l, m.topic, m.participants.join('・'), MSTAT[m.status], m.conclusion, S.tasks.filter(t => t.meetingId === m.id).length, fmtDT(m.createdAt)])]), 'text/csv');
+    hist('会議CSVを書き出し', `${S.meetings.length}件`); save();
+  },
+  async restore(){
+    const b = lsGet(KEY + '_backup');
+    if(!b){ toast('戻せる状態がありません'); return; }
+    if(!await ask('直前の状態に戻す', `最後の削除・読み込み・伏字化・初期化の直前の状態に戻します。現在の内容と入れ替えます。${CONN.mode === 'sheet' ? '\n戻した内容はスプレッドシートにも反映されます。' : ''}`, '戻す', true)) return;
+    const cur = JSON.stringify(S);
+    try{ S = migrate(JSON.parse(b)).data; }catch(e){ toast('復元に失敗しました'); return; }
+    lsSet(KEY + '_backup', cur);
+    commit('直前の状態に復元', '全データ'); toast('復元しました');
+  },
+  async reset(){
+    if(!await ask('全データを初期化', `この端末の会議・案件・実績・履歴をすべて消去します（設定は残ります）。${CONN.mode === 'sheet' ? '\n連携中のため、スプレッドシートと他の端末からも削除されます。' : ''}\n先にJSON書き出しでバックアップすることを推奨します。`, '次へ', true)) return;
+    if(!await ask('最終確認', '本当に初期化しますか？（「直前の状態に戻す」で1回だけ復元できます。旧版のデータには触れません）', '初期化する', true)) return;
+    backup(); const st = S.settings, meta = S.meta; S = fresh(); S.settings = st; S.meta = {...S.meta, lastExport:meta.lastExport};
+    commit('全データを初期化', '全データ'); toast('初期化しました');
+  },
+
+  /* --- 音声入力 --- */
+  mic(el){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if(!SR) return;
+    if(actions._rec){ actions._rec.stop(); return; }
+    const target = $('#' + el.dataset.target); const r = new SR();
+    r.lang = 'ja-JP'; r.interimResults = false; r.continuous = false;
+    r.onresult = e => { const txt = [...e.results].map(x => x[0].transcript).join(''); target.value = (target.value ? target.value + (target.value.endsWith('\n') ? '' : ' ') : '') + txt; };
+    r.onerror = e => toast(e.error === 'not-allowed' ? 'マイクの使用が許可されていません' : '音声入力できませんでした');
+    r.onend = () => { el.classList.remove('rec'); actions._rec = null; };
+    try{ r.start(); el.classList.add('rec'); actions._rec = r; toast('話してください…'); }catch(e){ toast('音声入力を開始できませんでした'); }
+  }
+};
+
+function parseAIs(text){
+  const errs = [], out = [];
+  String(text).split(/\r?\n/).map(s => s.trim()).filter(Boolean).forEach((line, i) => {
+    const [n = '', u = '', r = '', ...rest] = line.split(/\s*[|｜]\s*/);
+    const name = n.trim(), url = u.trim(), role = r.trim(), lens = rest.join(' ').trim();
+    if(!name){ errs.push(`${i+1}行目：名前が空です`); return; }
+    if(name.length > 30) errs.push(`${i+1}行目：名前は30字以内にしてください`);
+    if(url && !/^https:\/\/[^\s"'<>]+$/.test(url)) errs.push(`${i+1}行目：URLは https:// で始まる形式にしてください`);
+    if(scanText(url).length) errs.push(`${i+1}行目：URLに秘密情報らしき文字列があります`);
+    if(lens.length > 200) errs.push(`${i+1}行目：観点は200字以内にしてください`);
+    if(out.some(a => a.name === name)) errs.push(`${i+1}行目：「${name}」が重複しています`);
+    out.push({name, url, role:role.slice(0,20), lens});
+  });
+  if(!out.length) errs.push('AIを1つ以上設定してください');
+  return {out, errs};
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if(!el || el.disabled) return;
+  const fn = actions[el.dataset.act]; if(fn){ e.preventDefault(); fn(el); }
+});
+document.addEventListener('keydown', e => {
+  if((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role="button"][data-act]')){ e.preventDefault(); e.target.click(); }
+});
+$('#mtype-seg').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; mtype = b.dataset.t; NEW_MEMBERS = null; renderMeet(); });
+$('#period-seg').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; period = b.dataset.p; renderHome(); });
+$('#task-q').addEventListener('input', renderTasks);
+
+$('#csv-file').addEventListener('change', async e => {
+  const f = e.target.files[0]; if(!f) return;
+  if(f.size > 5 * 1024 * 1024){ toast('ファイルが大きすぎます（5MBまで）'); return; }
+  const rows = parseCSV(await readFileText(f));
+  if(rows.length < 2){ toast('データ行が見つかりません'); return; }
+  const headers = rows[0], map = mapHeaders(headers);
+  if(map.content == null || map.datetime == null){
+    openSheet('CSV取込', `<div class="alert">「日時」と「作業内容」に当たる列が必要です。見本CSVの見出しに合わせてください。<br>検出した見出し：${esc(headers.join('、'))}</div>`); return;
+  }
+  const cell = (r, k) => map[k] == null ? '' : String(r[map[k]] ?? '');
+  const prepared = rows.slice(1).map((r, i) => prepareLog(Object.fromEntries(Object.keys(FIELD_L).map(k => [k, cell(r, k)])), {source:'csv', rowLabel:`${i+2}行目`}));
+  markDups(prepared);
+  openImportPreview(prepared, 'csv', `CSV取込：${f.name}`);
+  $('#sheet-body').insertAdjacentHTML('afterbegin', `<label class="f" style="margin-top:0">列の対応</label><div class="card" style="font-size:14px;margin-bottom:10px">${Object.keys(FIELD_L).map(k => `<div class="meta" style="padding:2px 0"><span style="width:76px">${FIELD_L[k]}</span>${map[k] != null ? `← 「${esc(headers[map[k]])}」` : '<span class="bd">該当列なし</span>'}</div>`).join('')}</div>`);
+});
+$('#json-file').addEventListener('change', async e => {
+  const f = e.target.files[0]; if(!f) return;
+  let d; try{ d = JSON.parse(await readFileText(f)); }catch(err){ toast('JSONを読み込めませんでした'); return; }
+  if(!d || typeof d !== 'object' || !Array.isArray(d.tasks) || !Array.isArray(d.logs) || !d.version){ toast('BM Control のバックアップ形式ではありません'); return; }
+  const r = migrate(d);
+  const keep = S; S = r.data; const hits = auditAll(); S = keep;
+  let msg = `${f.name}（Ver.${r.fromVer}）\n会議 ${r.data.meetings.length}件／案件 ${r.data.tasks.length}件／実績 ${r.data.logs.length}件\n\n現在のデータと置き換えます（「直前の状態に戻す」で復元可）。${CONN.mode === 'sheet' ? '\n連携中のため、スプレッドシートの内容も置き換わります。' : ''}`;
+  if(r.notes.length) msg += `\n\n移行処理：\n・${r.notes.join('\n・')}`;
+  let masked = false;
+  if(hits.length){
+    const c = await choose('機密情報を検出しました', `読み込むデータに機密情報らしき記載が${hits.length}件あります。\nこのまま保存することはできません。`, [['読み込まない','cancel','ghost'], ['伏字にして読み込む','mask','warn']]);
+    if(c !== 'mask') return; masked = true;
+  }
+  if(!await ask('JSONを読み込む', msg, '置き換える', true)) return;
+  backup(); S = r.data; if(masked) maskAll();
+  commit('JSONを読み込み', f.name, `Ver.${r.fromVer}／案件${S.tasks.length}件／実績${S.logs.length}件${masked ? '／伏字化' : ''}`); toast('読み込みました');
+});
+
+/* ================= 起動 ================= */
+(function makeIcon(){
+  try{
+    const c = document.createElement('canvas'); c.width = c.height = 180; const x = c.getContext('2d'); if(!x) return;
+    x.fillStyle = '#050A12'; x.fillRect(0,0,180,180);
+    x.strokeStyle = 'rgba(46,230,166,.35)'; x.lineWidth = 2;
+    [[90,26],[150,62],[150,128],[90,156],[30,128],[30,62]].forEach(([px, py]) => { x.beginPath(); x.moveTo(90,90); x.lineTo(px,py); x.stroke(); x.fillStyle = '#6CCFF6'; x.beginPath(); x.arc(px,py,7,0,Math.PI*2); x.fill(); });
+    x.fillStyle = '#0A1A16'; x.beginPath(); x.arc(90,90,40,0,Math.PI*2); x.fill();
+    x.strokeStyle = '#2EE6A6'; x.lineWidth = 4; x.beginPath(); x.arc(90,90,40,0,Math.PI*2); x.stroke();
+    x.fillStyle = '#2EE6A6'; x.font = '700 30px Menlo,monospace'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('BM',90,92);
+    const url = c.toDataURL('image/png');
+    $('#touch-icon').href = url;
+    const base = location.href.split('#')[0].split('?')[0];
+    const man = {name:'Re:zenythe BM Control', short_name:'BM Control', start_url:base, scope:base.replace(/[^/]*$/,''), display:'standalone', background_color:'#050A12', theme_color:'#050A12', icons:[{src:url, sizes:'180x180', type:'image/png'}]};
+    $('#manifest').href = URL.createObjectURL(new Blob([JSON.stringify(man)], {type:'application/manifest+json'}));
+  }catch(e){}
+})();
+if(window.SpeechRecognition || window.webkitSpeechRecognition) $$('.mic').forEach(b => b.classList.remove('hide'));
+try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); }catch(e){}
+
+if(BOOT.migrated){ hist(`Ver.${BOOT.fromVer}のデータを移行`, `v${BOOT.fromVer} → v${APP_VER}`, `会議${S.meetings.length}／案件${S.tasks.length}／実績${S.logs.length}`); SUPPRESS_SYNC = true; save(); SUPPRESS_SYNC = false; }
+else if(BOOT.fresh){ hist('アプリを初期化', `Ver.${APP_VER}`, `検証開始日 ${S.settings.startDate}`); SUPPRESS_SYNC = true; save(); SUPPRESS_SYNC = false; }
+saveConn();
+renderAll();
+if(CONN.mode === 'sheet'){ sync({quiet:true}); }
+setInterval(() => { if(CONN.mode === 'sheet' && document.visibilityState !== 'hidden') sync({quiet:true}); }, 120000);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && CONN.mode === 'sheet') sync({quiet:true}); });
+window.addEventListener('online', () => { if(CONN.mode === 'sheet') sync({quiet:true}); });
+if(BOOT.migrated){
+  const au = auditAll();
+  openSheet('Ver.0.3 へ移行しました', `
+    <p style="margin-top:0">Ver.${esc(BOOT.fromVer)} のデータを引き継ぎました。<b>旧データは削除せず、端末内にそのまま残しています。</b></p>
+    <div class="kv"><span>会議</span><b>${S.meetings.length}件</b><span>案件</span><b>${S.tasks.length}件</b><span>実績</span><b>${S.logs.length}件</b><span>履歴</span><b>${S.history.length}件</b></div>
+    ${BOOT.notes.length ? `<label class="f">移行で行ったこと</label><ul class="errl" style="color:var(--mute)">${BOOT.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+    <label class="f">Ver.0.3 の主な変更</label>
+    <ul class="errl" style="color:var(--mute)"><li>新デザイン「神経回路」：会議の席次と思考の流れをホームに表示</li><li>Claude・Gemini・Copilotが意見を出し、議長が統合する会議</li><li>NotebookLMで議事録、Claudeで報告の検証</li><li>スプレッドシート連携：複数端末で共有、LINE・メールの報告を自動記録</li></ul>
+    ${au.length ? `<div class="alert">保存済みデータに機密情報らしき記載が${au.length}件あります。<button class="btn sm danger" style="margin-top:8px" data-act="audit-open">安全点検を開く</button></div>` : ''}
+    <div class="stack"><button class="btn primary" data-act="go" data-v="set">スプレッドシート連携を設定する</button><button class="btn ghost" data-act="close">あとで</button></div>`);
+}else if(BOOT.corrupt){
+  openSheet('データの読み込みエラー', '<div class="alert">保存データを読み込めませんでした。元のデータは別名で端末内に退避しています。JSONバックアップがあれば「設定 → JSON読み込み」で戻せます。</div>');
+}
+</script>
+</body>
+</html>
